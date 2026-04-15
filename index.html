@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>잰잇 블로그 포스팅 생성기</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=DM+Serif+Display&display=swap');
+
+  :root {
+    --bg: #f7f5f0;
+    --card: #ffffff;
+    --accent: #2d6a4f;
+    --accent2: #74c69d;
+    --accent3: #b7e4c7;
+    --text: #1a1a1a;
+    --muted: #888;
+    --border: #e0ddd8;
+    --step-done: #2d6a4f;
+    --step-active: #1b4332;
+    --step-pending: #ccc;
+    --radius: 14px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.07);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    background: var(--accent);
+    color: #fff;
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+  }
+  header .logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    letter-spacing: -0.5px;
+  }
+  header .sub { font-size: 12px; opacity: 0.75; margin-top: 2px; }
+  header .badge {
+    margin-left: auto;
+    background: rgba(255,255,255,0.2);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 0;
+    min-height: calc(100vh - 64px);
+  }
+
+  /* ── Sidebar Steps ── */
+  .sidebar {
+    background: #fff;
+    border-right: 1px solid var(--border);
+    padding: 28px 20px;
+    position: sticky;
+    top: 64px;
+    height: calc(100vh - 64px);
+    overflow-y: auto;
+  }
+  .sidebar-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .step-list { display: flex; flex-direction: column; gap: 6px; }
+  .step-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.15s;
+    position: relative;
+  }
+  .step-item:hover { background: var(--bg); }
+  .step-item.active { background: #e8f5ee; }
+
+  .step-num {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+    transition: all 0.3s;
+  }
+  .step-item.done .step-num { background: var(--step-done); color: #fff; }
+  .step-item.active .step-num { background: var(--step-active); color: #fff; box-shadow: 0 0 0 3px #b7e4c7; }
+  .step-item.pending .step-num { background: var(--bg); color: var(--muted); border: 2px solid var(--border); }
+
+  .step-info { flex: 1; }
+  .step-label { font-size: 13px; font-weight: 500; }
+  .step-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .step-item.done .step-label { color: var(--step-done); }
+  .step-item.active .step-label { color: var(--step-active); font-weight: 700; }
+  .step-item.pending .step-label { color: var(--muted); }
+
+  .step-connector {
+    width: 2px;
+    height: 10px;
+    background: var(--border);
+    margin: 0 0 0 22px;
+    border-radius: 2px;
+  }
+  .step-connector.done-line { background: var(--step-done); }
+
+  /* Progress bar */
+  .progress-wrap { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border); }
+  .progress-label { font-size: 11px; color: var(--muted); margin-bottom: 8px; display: flex; justify-content: space-between; }
+  .progress-bar { height: 6px; background: var(--border); border-radius: 99px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent2), var(--accent)); border-radius: 99px; transition: width 0.5s cubic-bezier(.4,0,.2,1); }
+
+  /* ── Main Content ── */
+  .main { padding: 32px; max-width: 860px; }
+
+  .section-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 28px;
+    margin-bottom: 20px;
+    border: 1px solid var(--border);
+    transition: box-shadow 0.2s;
+  }
+  .section-card.active-card { box-shadow: 0 0 0 2px var(--accent2), var(--shadow); }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .card-num {
+    width: 28px; height: 28px;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .card-title { font-size: 15px; font-weight: 700; }
+  .card-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  /* Form elements */
+  label { font-size: 13px; font-weight: 500; display: block; margin-bottom: 6px; }
+  input[type="text"], textarea, select {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    background: #fff;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  input[type="text"]:focus, textarea:focus, select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(45,106,79,0.1);
+  }
+  textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
+  select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23888' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; }
+
+  .form-row { margin-bottom: 16px; }
+  .form-hint { font-size: 11px; color: var(--muted); margin-top: 5px; }
+
+  /* Image upload */
+  .upload-zone {
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    padding: 32px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--bg);
+  }
+  .upload-zone:hover { border-color: var(--accent); background: #e8f5ee; }
+  .upload-icon { font-size: 32px; margin-bottom: 8px; }
+  .upload-text { font-size: 13px; color: var(--muted); }
+  .upload-text strong { color: var(--accent); }
+  #file-input { display: none; }
+
+  .preview-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+  .preview-item { position: relative; aspect-ratio: 1; border-radius: 8px; overflow: hidden; }
+  .preview-item img { width: 100%; height: 100%; object-fit: cover; }
+  .preview-item .remove-btn {
+    position: absolute; top: 4px; right: 4px;
+    background: rgba(0,0,0,0.6); color: #fff;
+    border: none; border-radius: 50%; width: 22px; height: 22px;
+    cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Type selector */
+  .type-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .type-btn {
+    padding: 12px 8px;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    background: #fff;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+  .type-btn:hover { border-color: var(--accent2); background: #f0faf4; }
+  .type-btn.selected { border-color: var(--accent); background: #e8f5ee; }
+  .type-btn .type-emoji { font-size: 22px; display: block; margin-bottom: 4px; }
+  .type-btn .type-name { font-size: 12px; font-weight: 500; color: var(--text); }
+  .type-btn.selected .type-name { color: var(--accent); font-weight: 700; }
+
+  /* Volume selector */
+  .volume-options { display: flex; flex-direction: column; gap: 10px; }
+  .volume-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'Noto Sans KR', sans-serif;
+    text-align: left;
+  }
+  .volume-btn:hover { border-color: var(--accent2); }
+  .volume-btn.selected { border-color: var(--accent); background: #e8f5ee; }
+  .volume-icon { font-size: 20px; }
+  .volume-info .volume-label { font-size: 13px; font-weight: 600; }
+  .volume-info .volume-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .volume-btn.selected .volume-label { color: var(--accent); }
+  input[type="radio"] { display: none; }
+
+  /* Content area */
+  .content-area {
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    min-height: 200px;
+    padding: 16px;
+    font-size: 14px;
+    line-height: 1.8;
+    outline: none;
+    transition: border-color 0.2s;
+    white-space: pre-wrap;
+  }
+  .content-area:focus { border-color: var(--accent); }
+  .content-area[contenteditable="true"]:empty:before {
+    content: attr(data-placeholder);
+    color: #bbb;
+  }
+
+  /* Copy button */
+  .copy-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .copy-btn:hover { background: var(--step-active); }
+  .copy-btn:active { transform: scale(0.97); }
+  .copy-btn.copied { background: #388e3c; }
+
+  /* Generate button */
+  .generate-btn {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--accent), #1b4332);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: opacity 0.2s, transform 0.1s;
+    letter-spacing: -0.3px;
+  }
+  .generate-btn:hover { opacity: 0.92; }
+  .generate-btn:active { transform: scale(0.99); }
+  .generate-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* Loading state */
+  .loading-wrap {
+    display: none;
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 40px 28px;
+    text-align: center;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+  }
+  .loading-wrap.visible { display: block; }
+
+  .loading-stage {
+    font-size: 14px;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 20px;
+    min-height: 22px;
+  }
+  .loading-bar-wrap {
+    height: 6px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .loading-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    border-radius: 99px;
+    width: 0%;
+    transition: width 0.6s cubic-bezier(.4,0,.2,1);
+  }
+  .loading-steps {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+  .lstep {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--muted);
+    transition: color 0.3s;
+  }
+  .lstep.active { color: var(--accent); font-weight: 600; }
+  .lstep.done { color: var(--step-done); }
+  .lstep-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: background 0.3s;
+  }
+  .lstep.active .lstep-dot { background: var(--accent); animation: pulse 1s infinite; }
+  .lstep.done .lstep-dot { background: var(--step-done); }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.3); opacity: 0.7; }
+  }
+
+  /* Result */
+  .result-wrap {
+    display: none;
+    background: var(--card);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .result-wrap.visible { display: block; }
+  .result-header {
+    background: linear-gradient(135deg, var(--accent), #1b4332);
+    color: #fff;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .result-title-label { font-size: 13px; font-weight: 700; }
+  .result-body { padding: 24px; }
+
+  .result-section { margin-bottom: 20px; }
+  .result-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .result-text {
+    font-size: 14px;
+    line-height: 1.85;
+    white-space: pre-wrap;
+    background: var(--bg);
+    border-radius: 10px;
+    padding: 16px;
+    border: 1px solid var(--border);
+  }
+  .result-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+  }
+  .tag {
+    background: #e8f5ee;
+    color: var(--accent);
+    border-radius: 99px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+  /* Keyword analysis */
+  .keyword-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .kw-card {
+    background: var(--bg);
+    border-radius: 10px;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+  }
+  .kw-card-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kw-card-value { font-size: 13px; font-weight: 600; color: var(--accent); }
+
+  .actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+  .action-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 18px;
+    border-radius: 9px;
+    border: 1.5px solid var(--border);
+    background: #fff;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .action-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .action-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .action-btn.primary:hover { background: var(--step-active); }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">✍️ 잰잇 블로그 생성기</div>
+    <div class="sub">네이버 블로그 SEO 최적화 포스팅 자동 작성</div>
+  </div>
+  <div class="badge">NAVER SEO 최적화</div>
+</header>
+
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-title">작성 단계</div>
+    <div class="step-list" id="stepList">
+      <div class="step-item active" data-step="1">
+        <div class="step-num">1</div>
+        <div class="step-info">
+          <div class="step-label">글 제목</div>
+          <div class="step-desc">포스팅 제목 입력</div>
+        </div>
+      </div>
+      <div class="step-connector" id="conn1"></div>
+      <div class="step-item pending" data-step="2">
+        <div class="step-num">2</div>
+        <div class="step-info">
+          <div class="step-label">글 유형</div>
+          <div class="step-desc">카테고리 선택</div>
+        </div>
+      </div>
+      <div class="step-connector" id="conn2"></div>
+      <div class="step-item pending" data-step="3">
+        <div class="step-num">3</div>
+        <div class="step-info">
+          <div class="step-label">내용 입력</div>
+          <div class="step-desc">경험 / 정보 입력</div>
+        </div>
+      </div>
+      <div class="step-connector" id="conn3"></div>
+      <div class="step-item pending" data-step="4">
+        <div class="step-num">4</div>
+        <div class="step-info">
+          <div class="step-label">사진 업로드</div>
+          <div class="step-desc">스크린샷 첨부 (선택)</div>
+        </div>
+      </div>
+      <div class="step-connector" id="conn4"></div>
+      <div class="step-item pending" data-step="5">
+        <div class="step-num">5</div>
+        <div class="step-info">
+          <div class="step-label">글 분량</div>
+          <div class="step-desc">원하는 글 길이 선택</div>
+        </div>
+      </div>
+      <div class="step-connector" id="conn5"></div>
+      <div class="step-item pending" data-step="6">
+        <div class="step-num">6</div>
+        <div class="step-info">
+          <div class="step-label">포스팅 생성</div>
+          <div class="step-desc">AI 글 자동 작성</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span>진행률</span>
+        <span id="progressPct">0%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill" style="width:0%"></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- Card 1: Title -->
+    <div class="section-card active-card" id="card1">
+      <div class="card-header">
+        <div class="card-num">1</div>
+        <div>
+          <div class="card-title">글 제목</div>
+          <div class="card-sub">네이버 검색 최적화 제목 — 키워드가 앞에 오도록 입력하세요</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>포스팅 제목 *</label>
+        <input type="text" id="titleInput" placeholder="예: 속초 장칼국수 원조 정든식당 후기 | 째깐한 만두까지 친구들이랑" oninput="checkProgress()">
+        <div class="form-hint">💡 지역명 + 업체명 + 핵심 키워드 순서로 작성하면 SEO에 유리해요</div>
+      </div>
+      <div class="form-row">
+        <label>추가 정보 / 메모 (선택)</label>
+        <textarea id="memoInput" placeholder="예: 친구 둘이랑 방문, 장칼국수 7000원, 만두 4000원, 웨이팅 있었음" rows="3" oninput="checkProgress()"></textarea>
+      </div>
+    </div>
+
+    <!-- Card 2: Type -->
+    <div class="section-card" id="card2">
+      <div class="card-header">
+        <div class="card-num">2</div>
+        <div>
+          <div class="card-title">글 유형 선택</div>
+          <div class="card-sub">포스팅 카테고리를 선택하면 맞춤 구성이 적용돼요</div>
+        </div>
+      </div>
+      <div class="type-grid">
+        <button class="type-btn" onclick="selectType(this, '맛집')">
+          <span class="type-emoji">🍜</span>
+          <span class="type-name">맛집</span>
+        </button>
+        <button class="type-btn" onclick="selectType(this, '카페')">
+          <span class="type-emoji">☕</span>
+          <span class="type-name">카페</span>
+        </button>
+        <button class="type-btn" onclick="selectType(this, '여행')">
+          <span class="type-emoji">✈️</span>
+          <span class="type-name">여행</span>
+        </button>
+        <button class="type-btn" onclick="selectType(this, '숙소')">
+          <span class="type-emoji">🏨</span>
+          <span class="type-name">숙소</span>
+        </button>
+        <button class="type-btn" onclick="selectType(this, '캠핑')">
+          <span class="type-emoji">⛺</span>
+          <span class="type-name">캠핑</span>
+        </button>
+        <button class="type-btn" onclick="selectType(this, '미용후기')">
+          <span class="type-emoji">💅</span>
+          <span class="type-name">미용후기</span>
+        </button>
+        <button class="type-btn" onclick="selectType(this, '쇼핑')">
+          <span class="type-emoji">🛍️</span>
+          <span class="type-name">쇼핑</span>
+        </button>
+        <button class="type-btn" onclick="selectType(this, '투어')">
+          <span class="type-emoji">🗺️</span>
+          <span class="type-name">투어</span>
+        </button>
+        <button class="type-btn" onclick="selectType(this, '전시/문화')">
+          <span class="type-emoji">🎨</span>
+          <span class="type-name">전시/문화</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Card 3: Content -->
+    <div class="section-card" id="card3">
+      <div class="card-header">
+        <div class="card-num">3</div>
+        <div>
+          <div class="card-title">내용 입력</div>
+          <div class="card-sub">경험한 내용을 자유롭게 적어주세요 — 키워드와 감상을 함께</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>방문/경험 내용 *</label>
+        <textarea id="contentInput" rows="6" placeholder="예: 친구 둘이랑 속초 여행 중 정든식당에 갔어요. 장칼국수를 먹었는데 면이 쫄깃하고 국물이 얼큰하게 맛있었어요. 째깐한 만두도 4000원인데 너무 맛있었어요. 웨이팅이 있었어요." oninput="checkProgress()"></textarea>
+        <div class="form-hint">💡 구체적일수록 더 실감나는 포스팅이 만들어져요 (가격, 메뉴명, 동행자 등)</div>
+      </div>
+      <div class="form-row">
+        <label>장소/제품 기본 정보 (선택)</label>
+        <textarea id="infoInput" rows="3" placeholder="예: 주소: 강원 속초시 번영로105번길 39 / 영업시간: 10:00-19:00 / 월요일 휴무 / 가격: 장칼국수 7000원"></textarea>
+      </div>
+    </div>
+
+    <!-- Card 4: Image -->
+    <div class="section-card" id="card4">
+      <div class="card-header">
+        <div class="card-num">4</div>
+        <div>
+          <div class="card-title">사진 / 스크린샷 업로드</div>
+          <div class="card-sub">블로그에 올릴 사진을 미리 업로드해서 캡션 가이드를 받아요 (선택)</div>
+        </div>
+      </div>
+      <div class="upload-zone" onclick="document.getElementById('file-input').click()">
+        <div class="upload-icon">📸</div>
+        <div class="upload-text"><strong>클릭해서 사진 선택</strong> 또는 여기로 드래그</div>
+        <div class="upload-text" style="margin-top:4px; font-size:11px;">JPG, PNG 지원</div>
+      </div>
+      <input type="file" id="file-input" multiple accept="image/*" onchange="previewImages(event)">
+      <div class="preview-grid" id="previewGrid"></div>
+    </div>
+
+    <!-- Card 5: Volume -->
+    <div class="section-card" id="card5">
+      <div class="card-header">
+        <div class="card-num">5</div>
+        <div>
+          <div class="card-title">글 분량 선택</div>
+          <div class="card-sub">원하는 포스팅 길이를 선택해주세요</div>
+        </div>
+      </div>
+      <div class="volume-options">
+        <label class="volume-btn" onclick="selectVolume(this, 'short')">
+          <input type="radio" name="volume" value="short">
+          <span class="volume-icon">📝</span>
+          <div class="volume-info">
+            <div class="volume-label">적게 — 800~1,000자</div>
+            <div class="volume-desc">핵심 정보 중심, 간결한 후기 (빠르게 읽히는 스타일)</div>
+          </div>
+        </label>
+        <label class="volume-btn" onclick="selectVolume(this, 'normal')">
+          <input type="radio" name="volume" value="normal">
+          <span class="volume-icon">📄</span>
+          <div class="volume-info">
+            <div class="volume-label">보통 — 1,500~1,800자</div>
+            <div class="volume-desc">정보 + 감상 균형, 네이버 SEO 최적 분량</div>
+          </div>
+        </label>
+        <label class="volume-btn" onclick="selectVolume(this, 'long')">
+          <input type="radio" name="volume" value="long">
+          <span class="volume-icon">📚</span>
+          <div class="volume-info">
+            <div class="volume-label">많이 — 1,800~2,100자</div>
+            <div class="volume-desc">상세 정보 + 팁 + 총평, C-Rank 상승에 유리한 분량</div>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <!-- Generate -->
+    <div class="section-card" id="card6">
+      <div class="card-header">
+        <div class="card-num">6</div>
+        <div>
+          <div class="card-title">포스팅 생성</div>
+          <div class="card-sub">입력한 내용을 바탕으로 SEO 최적화 블로그 글을 자동 작성해요</div>
+        </div>
+      </div>
+      <button class="generate-btn" id="generateBtn" onclick="generatePost()">
+        ✨ 포스팅 자동 생성하기
+      </button>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-wrap" id="loadingWrap">
+      <div class="loading-stage" id="loadingStage">분석 중...</div>
+      <div class="loading-bar-wrap">
+        <div class="loading-bar" id="loadingBar"></div>
+      </div>
+      <div class="loading-steps">
+        <div class="lstep" id="ls1"><div class="lstep-dot"></div> 제목 분석</div>
+        <div class="lstep" id="ls2"><div class="lstep-dot"></div> 키워드 추출</div>
+        <div class="lstep" id="ls3"><div class="lstep-dot"></div> 정보 구조화</div>
+        <div class="lstep" id="ls4"><div class="lstep-dot"></div> 글 작성</div>
+        <div class="lstep" id="ls5"><div class="lstep-dot"></div> SEO 최적화</div>
+        <div class="lstep" id="ls6"><div class="lstep-dot"></div> 완성</div>
+      </div>
+    </div>
+
+    <!-- Result -->
+    <div class="result-wrap" id="resultWrap">
+      <div class="result-header">
+        <div class="result-title-label">🎉 포스팅 생성 완료!</div>
+        <div style="font-size:12px; opacity:0.8;" id="resultMeta"></div>
+      </div>
+      <div class="result-body">
+
+        <div class="result-section">
+          <div class="result-section-title">📌 추천 제목 (SEO 최적화)</div>
+          <div class="result-text" id="resultTitle"></div>
+          <button class="copy-btn" onclick="copyText('resultTitle', this)">📋 복사</button>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="result-section">
+          <div class="result-section-title">🔍 키워드 분석</div>
+          <div class="keyword-grid" id="keywordGrid"></div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="result-section">
+          <div class="result-section-title">📝 블로그 본문</div>
+          <div class="result-text" id="resultBody"></div>
+          <button class="copy-btn" onclick="copyText('resultBody', this)">📋 전체 복사</button>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="result-section">
+          <div class="result-section-title">🏷️ 해시태그</div>
+          <div class="result-tags" id="resultTags"></div>
+          <button class="copy-btn" onclick="copyTags(this)" style="margin-top:10px;">📋 태그 복사</button>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="result-section">
+          <div class="result-section-title">🎬 릴스 자막 (짧은 버전)</div>
+          <div class="result-text" id="resultReel"></div>
+          <button class="copy-btn" onclick="copyText('resultReel', this)">📋 복사</button>
+        </div>
+
+        <div class="actions">
+          <button class="action-btn primary" onclick="copyAll()">📋 전체 내용 복사</button>
+          <button class="action-btn" onclick="resetAll()">🔄 새로 작성</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+let selectedType = '';
+let selectedVolume = '';
+let uploadedFiles = [];
+
+// ── Step sidebar update ──
+function updateSteps(activeStep) {
+  const items = document.querySelectorAll('.step-item');
+  const conns = document.querySelectorAll('.step-connector');
+  items.forEach((item, i) => {
+    const step = i + 1;
+    item.classList.remove('done', 'active', 'pending');
+    if (step < activeStep) item.classList.add('done');
+    else if (step === activeStep) item.classList.add('active');
+    else item.classList.add('pending');
+  });
+  conns.forEach((c, i) => {
+    c.classList.remove('done-line');
+    if (i + 1 < activeStep) c.classList.add('done-line');
+  });
+}
+
+function checkProgress() {
+  const title = document.getElementById('titleInput').value.trim();
+  const content = document.getElementById('contentInput').value.trim();
+  let step = 1;
+  if (title) step = 2;
+  if (title && selectedType) step = 3;
+  if (title && selectedType && content) step = 4;
+  if (title && selectedType && content && uploadedFiles.length >= 0) step = 5;
+  if (title && selectedType && content && selectedVolume) step = 6;
+
+  updateSteps(step);
+  const pct = Math.round(((step - 1) / 5) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressPct').textContent = pct + '%';
+
+  // Highlight active card
+  for (let i = 1; i <= 6; i++) {
+    document.getElementById('card' + i).classList.remove('active-card');
+  }
+  document.getElementById('card' + Math.min(step, 6)).classList.add('active-card');
+}
+
+function selectType(btn, type) {
+  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedType = type;
+  checkProgress();
+}
+
+function selectVolume(label, vol) {
+  document.querySelectorAll('.volume-btn').forEach(b => b.classList.remove('selected'));
+  label.classList.add('selected');
+  selectedVolume = vol;
+  checkProgress();
+}
+
+function previewImages(e) {
+  const files = Array.from(e.target.files);
+  uploadedFiles = [...uploadedFiles, ...files];
+  const grid = document.getElementById('previewGrid');
+  files.forEach((file, idx) => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const wrap = document.createElement('div');
+      wrap.className = 'preview-item';
+      wrap.innerHTML = `<img src="${ev.target.result}" alt="preview"><button class="remove-btn" onclick="removeImg(this)">✕</button>`;
+      grid.appendChild(wrap);
+    };
+    reader.readAsDataURL(file);
+  });
+  checkProgress();
+}
+
+function removeImg(btn) {
+  btn.parentElement.remove();
+}
+
+// ── Generate ──
+function generatePost() {
+  const title = document.getElementById('titleInput').value.trim();
+  const memo = document.getElementById('memoInput').value.trim();
+  const content = document.getElementById('contentInput').value.trim();
+  const info = document.getElementById('infoInput').value.trim();
+
+  if (!title || !selectedType || !content || !selectedVolume) {
+    alert('제목, 유형, 내용, 분량을 모두 선택해주세요!');
+    return;
+  }
+
+  document.getElementById('generateBtn').disabled = true;
+  document.getElementById('loadingWrap').classList.add('visible');
+  document.getElementById('resultWrap').classList.remove('visible');
+
+  const stages = [
+    { id: 'ls1', label: '📊 제목 및 키워드 분석 중...', pct: 15 },
+    { id: 'ls2', label: '🔍 SEO 키워드 추출 중...', pct: 30 },
+    { id: 'ls3', label: '🗂️ 정보 구조화 중...', pct: 50 },
+    { id: 'ls4', label: '✍️ 블로그 본문 작성 중...', pct: 70 },
+    { id: 'ls5', label: '🎯 SEO 최적화 적용 중...', pct: 88 },
+    { id: 'ls6', label: '✅ 포스팅 완성!', pct: 100 },
+  ];
+
+  let i = 0;
+  function runStage() {
+    if (i > 0) {
+      document.getElementById(stages[i-1].id).classList.remove('active');
+      document.getElementById(stages[i-1].id).classList.add('done');
+    }
+    if (i >= stages.length) {
+      setTimeout(() => showResult(title, memo, content, info), 400);
+      return;
+    }
+    const s = stages[i];
+    document.getElementById('loadingStage').textContent = s.label;
+    document.getElementById('loadingBar').style.width = s.pct + '%';
+    document.getElementById(s.id).classList.add('active');
+    i++;
+    setTimeout(runStage, 700);
+  }
+  runStage();
+}
+
+function showResult(title, memo, content, info) {
+  const volMap = { short: '800~1,000자', normal: '1,500~1,800자', long: '1,800~2,100자' };
+  document.getElementById('resultMeta').textContent = `${selectedType} · ${volMap[selectedVolume]}`;
+
+  // SEO 제목
+  const seoTitle = buildSeoTitle(title, selectedType);
+  document.getElementById('resultTitle').textContent = seoTitle;
+
+  // 키워드
+  buildKeywords(title, content);
+
+  // 본문
+  const body = buildBody(title, memo, content, info, selectedType, selectedVolume);
+  document.getElementById('resultBody').textContent = body;
+
+  // 태그
+  buildTags(title, selectedType);
+
+  // 릴스
+  const reel = buildReel(title, content, selectedType);
+  document.getElementById('resultReel').textContent = reel;
+
+  document.getElementById('loadingWrap').classList.remove('visible');
+  document.getElementById('resultWrap').classList.add('visible');
+  document.getElementById('generateBtn').disabled = false;
+
+  document.getElementById('resultWrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  updateSteps(6);
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('progressPct').textContent = '100%';
+}
+
+function buildSeoTitle(title, type) {
+  const typeEmoji = { 맛집:'🍜', 카페:'☕', 여행:'✈️', 숙소:'🏨', 캠핑:'⛺', 미용후기:'💅', 쇼핑:'🛍️', 투어:'🗺️', '전시/문화':'🎨' };
+  const em = typeEmoji[type] || '📝';
+  if (title.includes('|')) return em + ' ' + title;
+  const keywords = extractKeywords(title);
+  return em + ' ' + title + ' | ' + keywords.slice(0,2).join(' · ') + ' 솔직 후기';
+}
+
+function extractKeywords(text) {
+  const stopwords = ['의','이','가','을','를','은','는','에','에서','로','으로','와','과','도','만','그','저','이것','저것'];
+  return text.split(/[\s,\|\-]+/).filter(w => w.length > 1 && !stopwords.includes(w)).slice(0, 6);
+}
+
+function buildKeywords(title, content) {
+  const combined = title + ' ' + content;
+  const kws = extractKeywords(combined);
+  const grid = document.getElementById('keywordGrid');
+  grid.innerHTML = '';
+  const labels = ['메인 키워드', '서브 키워드', '지역 키워드', '검색 의도'];
+  const vals = [kws[0]||'-', kws.slice(1,3).join(', ')||'-', kws.find(k=>k.length>=2)||'-', '후기/방문/추천'];
+  labels.forEach((l,i) => {
+    const d = document.createElement('div');
+    d.className = 'kw-card';
+    d.innerHTML = `<div class="kw-card-label">${l}</div><div class="kw-card-value">${vals[i]}</div>`;
+    grid.appendChild(d);
+  });
+}
+
+function buildBody(title, memo, content, info, type, volume) {
+  const greetings = [
+    '안녕하세요! 역마살 제대로 낀 6년 차 웹디자이너,\n여행블로거 잰잇입니다 ^ㅎ^\n',
+    '안녕하세요!\n여행과 맛집을 사랑하는 잰잇입니다 ^ㅎ^\n',
+  ];
+  const greeting = greetings[Math.floor(Math.random() * greetings.length)];
+
+  const kws = extractKeywords(title);
+  const mainKw = kws[0] || title.slice(0,8);
+
+  let infoBlock = '';
+  if (info) {
+    infoBlock = '\n\n📍 기본 정보\n' + info.split('/').map(s => '✔ ' + s.trim()).join('\n');
+  }
+
+  const typeIntros = {
+    맛집: `속초 여행에서 빠질 수 없는 코스가 있죠.\n오늘은 ${mainKw} 다녀온 솔직 후기 전해드릴게요!`,
+    카페: `카페 투어를 빼놓으면 섭섭하죠.\n오늘 소개할 곳은 ${mainKw}예요!`,
+    여행: `이번 여행의 하이라이트 중 하나를 소개할게요.\n바로 ${mainKw}예요!`,
+    숙소: `여행에서 숙소는 정말 중요하죠.\n이번에 다녀온 ${mainKw} 솔직 후기 가져왔어요!`,
+    캠핑: `반려견과 함께 떠난 캠핑 이야기예요.\n오늘 소개할 곳은 ${mainKw}랍니다!`,
+    미용후기: `오늘은 내돈내산 미용 후기 가져왔어요.\n${mainKw} 솔직하게 알려드릴게요!`,
+    쇼핑: `쇼핑 좋아하시는 분들 주목!\n${mainKw} 다녀온 후기 공유할게요 😊`,
+    투어: `파리 여행에서 빠질 수 없는 코스 중 하나를 소개할게요.\n${mainKw} 후기예요!`,
+    '전시/문화': `문화생활 하고 싶을 때 딱인 곳을 발견했어요.\n${mainKw} 다녀온 후기 공유할게요!`,
+  };
+
+  const intro = typeIntros[type] || `오늘은 ${mainKw} 다녀온 후기를 공유할게요!`;
+
+  let bodyContent = content;
+
+  const volumeExtra = {
+    short: '',
+    normal: '\n\n💡 잰잇의 팁\n다음에 방문할 분들을 위해 팁을 남겨요.\n미리 예약하거나 오픈 직후 방문하시면 웨이팅 없이 즐기실 수 있어요!',
+    long: '\n\n💡 잰잇의 팁\n다음에 방문할 분들을 위해 팁을 남겨요.\n미리 예약하거나 오픈 직후 방문하시면 웨이팅 없이 즐기실 수 있어요!\n\n총평으로 정리하자면 이번 방문은 매우 만족스러웠어요.\n가격 대비 퀄리티가 훌륭했고, 다음에 속초에 오면 또 올 것 같아요!\n속초 여행 계획 중이라면 꼭 이 코스 넣어보세요 ^ㅎ^',
+  };
+
+  const outro = '\n\n오늘 포스팅이 도움 되셨다면 공감이랑 서이추 꾸욱 눌러주세요!\n다음에 더 따뜻한 여행 정보로 돌아올게요 💖';
+
+  return `${greeting}\n${intro}${infoBlock}\n\n${memo ? '📌 방문 메모\n' + memo + '\n\n' : ''}${bodyContent}${volumeExtra[volume]}${outro}`;
+}
+
+function buildTags(title, type) {
+  const typeTagMap = {
+    맛집: ['#맛집', '#내돈내산후기', '#맛집추천'],
+    카페: ['#카페', '#카페투어', '#카페추천'],
+    여행: ['#여행', '#여행후기', '#여행추천'],
+    숙소: ['#숙소', '#숙소후기', '#숙소추천'],
+    캠핑: ['#캠핑', '#캠핑후기', '#애견캠핑'],
+    미용후기: ['#미용', '#내돈내산', '#미용후기'],
+    쇼핑: ['#쇼핑', '#쇼핑후기', '#명품쇼핑'],
+    투어: ['#투어', '#파리여행', '#투어후기'],
+    '전시/문화': ['#전시', '#문화생활', '#미술관'],
+  };
+  const kws = extractKeywords(title);
+  const baseTags = (typeTagMap[type] || []).map(t => t);
+  const kwTags = kws.slice(0,5).map(k => '#' + k);
+  const allTags = [...new Set([...kwTags, ...baseTags, '#여행다니는잰잇', '#내돈내산후기'])].slice(0, 15);
+
+  const container = document.getElementById('resultTags');
+  container.innerHTML = '';
+  allTags.forEach(tag => {
+    const span = document.createElement('span');
+    span.className = 'tag';
+    span.textContent = tag;
+    container.appendChild(span);
+  });
+}
+
+function buildReel(title, content, type) {
+  const kws = extractKeywords(title);
+  const mainKw = kws[0] || '';
+  return `${mainKw} 다녀왔어요 🌟\n\n${content.slice(0, 80)}...\n\n진짜 맛있었고 또 오고 싶은 곳!\n\n📍 ${title.split('|')[0].trim()}\n💡 자세한 후기는 프로필 블로그에서!\n@속초 여행 고민 중인 친구 소환 🏃‍♀️💨`;
+}
+
+// ── Copy helpers ──
+function copyText(id, btn) {
+  const text = document.getElementById(id).textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✅ 복사됨!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '📋 복사'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function copyTags(btn) {
+  const tags = Array.from(document.querySelectorAll('.tag')).map(t => t.textContent).join(' ');
+  navigator.clipboard.writeText(tags).then(() => {
+    btn.textContent = '✅ 복사됨!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '📋 태그 복사'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function copyAll() {
+  const title = document.getElementById('resultTitle').textContent;
+  const body = document.getElementById('resultBody').textContent;
+  const tags = Array.from(document.querySelectorAll('.tag')).map(t => t.textContent).join(' ');
+  const reel = document.getElementById('resultReel').textContent;
+  const all = `[제목]\n${title}\n\n[본문]\n${body}\n\n[해시태그]\n${tags}\n\n[릴스 자막]\n${reel}`;
+  navigator.clipboard.writeText(all).then(() => alert('전체 내용이 클립보드에 복사됐어요! ✅'));
+}
+
+function resetAll() {
+  document.getElementById('titleInput').value = '';
+  document.getElementById('memoInput').value = '';
+  document.getElementById('contentInput').value = '';
+  document.getElementById('infoInput').value = '';
+  document.getElementById('previewGrid').innerHTML = '';
+  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('selected'));
+  document.querySelectorAll('.volume-btn').forEach(b => b.classList.remove('selected'));
+  document.querySelectorAll('input[name="volume"]').forEach(r => r.checked = false);
+  selectedType = '';
+  selectedVolume = '';
+  uploadedFiles = [];
+  document.getElementById('resultWrap').classList.remove('visible');
+  document.getElementById('loadingWrap').classList.remove('visible');
+  document.getElementById('generateBtn').disabled = false;
+  updateSteps(1);
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('progressPct').textContent = '0%';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Drag & drop
+const uploadZone = document.querySelector('.upload-zone');
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.style.borderColor = 'var(--accent)'; });
+uploadZone.addEventListener('dragleave', () => { uploadZone.style.borderColor = ''; });
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadZone.style.borderColor = '';
+  const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+  previewImages({ target: { files } });
+});
+
+// Init
+updateSteps(1);
+</script>
+</body>
+</html>
