@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>잰잇 블로그 스튜디오 v4</title>
+<title>잰잇 블로그 스튜디오 v6</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
 :root{--green:#2d6a4f;--green2:#1b4332;--gl:#e8f5ee;--gm:#74c69d;--bg:#f7f6f2;--card:#fff;--border:#e4e1dc;--text:#1a1a1a;--muted:#888;--danger:#dc3545}
@@ -611,7 +611,7 @@ function collectTypeFields(){
 }
 
 function buildPrompt(t,m,c,info){
-  var vm={short:'800~1000자',normal:'1500~1800자',long:'1800~2100자'};
+  var vm={short:'800~1000자 (공백 포함 기준, 최소 800자 이상)',normal:'1500~1800자 (공백 포함 기준, 최소 1500자 이상)',long:'1800~2100자 (공백 포함 기준, 최소 1800자 이상)'};
   var typeExtra=collectTypeFields();
 
   /* 유형별 글 구성 순서 */
@@ -691,17 +691,24 @@ function buildPrompt(t,m,c,info){
 
     +(imgs.length>0?'[사진 배치]\n사진 '+imgs.length+'장 첨부됨. 각 사진을 분석 후 본문에서 가장 어울리는 위치에 [사진1] [사진2] ... 배치.\n각 [사진N] 아래에 사진 내용에 맞는 캡션 한 줄 추가. 사진에 없는 장면은 추측하지 마세요.\n\n':'')
 
+    +'[⚠️ 분량 — 가장 중요한 규칙]\n'
+    +'body 필드의 본문 글자수(공백 포함)가 반드시 '+(vm[sV]||'1500~1800자')+' 범위 안에 있어야 합니다.\n'
+    +'이 범위보다 짧으면 실패입니다. 글자수를 세면서 작성하세요.\n'
+    +'분량을 채우는 방법: 각 소제목 섹션에서 직접 겪은 상황을 더 구체적으로 묘사하고, 개인적 반응을 넣고, 독자에게 도움 되는 실용 정보를 추가하세요.\n'
+    +'같은 말을 반복하거나 없는 정보를 만들어서 채우지는 마세요.\n\n'
+
     +'[SEO]\n'
     +'제목 형식: 지역 + 핵심 검색 키워드 + 장소명 + 주요 특징 (30~35자)\n'
     +'본문에 주요 키워드를 도입부, 관련 소제목, 총평에 자연스럽게 배치. 부자연스러운 반복 금지.\n\n'
 
-    +'[body규칙] 줄바꿈은 \\n, 순수 텍스트만, 마크다운 금지\n\n'
+    +'[body규칙] 줄바꿈은 \\n, 순수 텍스트만, 마크다운 금지. 소제목 앞에 이모지 1개 포함 가능.\n\n'
 
     +'[출력 JSON 형식] — title 5개, thumbnail 5개로 반드시 출력:\n'
+    +'body 필드는 공백 포함 '+(vm[sV]||'1500~1800자')+' 이상이어야 합니다. 짧으면 다시 작성하세요.\n'
     +'{"title_1":"SEO 제목 1 (지역+키워드+장소명+특징, 30~35자)","title_2":"","title_3":"","title_4":"","title_5":"",'
     +'"keyword_main":"","keyword_sub":"","keyword_location":"","keyword_intent":"",'
     +'"place_name":"업체명","place_address":"정확한 주소","place_hours":"영업시간","place_price":"가격대",'
-    +'"body":"본문 ('+((vm[sV]||'1500~1800자'))+')",'
+    +'"body":"본문 (반드시 '+(vm[sV]||'1500~1800자')+' 공백 포함)",'
     +'"hashtags":["#태그1","#태그2"],'
     +'"reel":"릴스 숏폼 자막 (짧고 리듬감 있게, 처음 1~2줄에 관심을 끌 수 있는 문구)",'
     +'"thumbnail_1":"메인 문구 (검색 키워드+장소 특징)","thumbnail_2":"","thumbnail_3":"","thumbnail_4":"","thumbnail_5":""}';
@@ -811,7 +818,15 @@ function show(d,naver){
   }
 
   /* 본문 */
-  var bs=nl(d.body||'');g('btxt').textContent=bs;g('cc').textContent=bs.replace(/\s/g,'').length.toLocaleString()+'자';g('rb3').className='rb on';
+  var bs=nl(d.body||'');g('btxt').textContent=bs;
+  var charWithSpace=bs.length;
+  var charNoSpace=bs.replace(/\s/g,'').length;
+  var targetMap={short:800,normal:1500,long:1800};
+  var minTarget=targetMap[sV]||1500;
+  var charInfo=charNoSpace.toLocaleString()+'자 (공백 포함 '+charWithSpace.toLocaleString()+'자)';
+  if(charWithSpace<minTarget){charInfo+=' ⚠️ 목표 '+minTarget+'자 미달!';}
+  g('cc').textContent=charInfo;
+  g('rb3').className='rb on';
 
   /* 해시태그 */
   var tw=g('tw');tw.innerHTML='';var ht=d.hashtags||[];
