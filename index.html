@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>잰잇 블로그 스튜디오 v4</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+:root{--green:#2d6a4f;--green2:#1b4332;--gl:#e8f5ee;--gm:#74c69d;--bg:#f7f6f2;--card:#fff;--border:#e4e1dc;--text:#1a1a1a;--muted:#888;--danger:#dc3545}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);font-size:14px;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+
+/* 모달 */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:999;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal.hide{display:none}
+.modal-box{background:#fff;border-radius:16px;padding:30px;max-width:460px;width:100%}
+.modal-t{font-size:18px;font-weight:700;margin-bottom:8px}
+.modal-d{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:18px}
+.modal-d a{color:var(--green)}
+.modal-in{width:100%;border:1.5px solid var(--border);border-radius:9px;padding:12px 14px;font-family:inherit;font-size:14px;outline:none;margin-bottom:12px}
+.modal-in:focus{border-color:var(--green)}
+.modal-e{font-size:12px;color:var(--danger);margin-bottom:10px;display:none}
+.modal-e.on{display:block}
+.modal-b{width:100%;padding:13px;background:var(--green);color:#fff;border:none;border-radius:9px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer}
+
+/* 헤더 */
+.hd{background:var(--green);color:#fff;height:52px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 20px}
+.hd-l{font-size:16px;font-weight:700}
+.hd-r{display:flex;gap:8px;align-items:center}
+.hd-st{display:flex;align-items:center;gap:6px;font-size:11px;background:rgba(255,255,255,.15);border-radius:99px;padding:4px 11px;cursor:pointer}
+.hd-dot{width:7px;height:7px;border-radius:50%;background:#ff6b6b}
+.hd-dot.on{background:var(--gm)}
+
+/* 메인 */
+.main{flex:1;display:flex;min-height:0}
+.left{width:420px;flex-shrink:0;background:var(--card);border-right:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column}
+.left-body{flex:1;padding:18px;overflow-y:auto}
+.left-body::-webkit-scrollbar{width:4px}
+.left-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
+.right{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:14px}
+.right::-webkit-scrollbar{width:4px}
+.right::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
+
+/* 탭 전환 */
+.tab-bar{display:flex;border-bottom:1px solid var(--border);background:var(--card);flex-shrink:0}
+.tab-btn{flex:1;padding:11px;text-align:center;font-family:inherit;font-size:13px;font-weight:500;border:none;background:none;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;transition:all .15s}
+.tab-btn.on{color:var(--green);border-bottom-color:var(--green);font-weight:700}
+.tab-content{display:none}
+.tab-content.on{display:flex;flex-direction:column;gap:14px;flex:1}
+
+/* 왼쪽 폼 요소들 */
+.sec{margin-bottom:18px}
+.sec-t{font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin-bottom:9px;display:flex;gap:6px;align-items:center}
+.sec-n{width:18px;height:18px;background:var(--green);color:#fff;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center}
+label{font-size:12px;font-weight:500;color:#555;display:block;margin-bottom:5px}
+input[type=text],textarea{width:100%;border:1.5px solid var(--border);border-radius:9px;padding:10px 12px;font-family:inherit;font-size:14px;background:#fff;outline:none;resize:none;line-height:1.6}
+input[type=text]:focus,textarea:focus{border-color:var(--green)}
+.hint{font-size:10px;color:var(--muted);margin-top:4px}
+.fr{margin-bottom:12px}
+.tg{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.tb{padding:10px 4px;border:1.5px solid var(--border);border-radius:9px;background:#fff;cursor:pointer;text-align:center;font-family:inherit;font-size:11px;color:var(--text)}
+.tb:hover{border-color:var(--gm);background:var(--gl)}
+.tb.on{border-color:var(--green);background:var(--gl);font-weight:700;color:var(--green)}
+.tb em{font-size:18px;display:block;margin-bottom:2px;font-style:normal}
+.vl{display:flex;flex-direction:column;gap:6px}
+.vb{display:flex;align-items:center;gap:10px;padding:11px 13px;border:1.5px solid var(--border);border-radius:9px;background:#fff;cursor:pointer;font-family:inherit;text-align:left;width:100%}
+.vb:hover{border-color:var(--gm)}
+.vb.on{border-color:var(--green);background:var(--gl)}
+.vb-l{font-size:12px;font-weight:600}
+.vb-d{font-size:10px;color:var(--muted);margin-top:1px}
+.vb.on .vb-l{color:var(--green)}
+input[type=radio]{display:none}
+.up{border:2px dashed var(--border);border-radius:9px;padding:18px 14px;text-align:center;cursor:pointer;background:var(--bg)}
+.up:hover{border-color:var(--green);background:var(--gl)}
+.up-t{font-size:12px;color:var(--muted)}
+.up-t strong{color:var(--green)}
+#fi{display:none}
+.pg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}
+.pi{position:relative;aspect-ratio:1;border-radius:7px;overflow:hidden;border:1px solid var(--border)}
+.pi img{width:100%;height:100%;object-fit:cover}
+.pi-n{position:absolute;top:3px;left:3px;background:rgba(0,0,0,.6);color:#fff;font-size:9px;padding:1px 5px;border-radius:4px}
+.db{position:absolute;top:3px;right:3px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:18px;height:18px;cursor:pointer;font-size:11px}
+.cn{font-size:10px;color:var(--green);background:var(--gl);border-radius:7px;padding:7px 10px;margin-top:8px;display:none}
+.cn.on{display:block}
+.pc{font-size:11px;color:var(--muted);margin-top:7px;text-align:center}
+.err{background:#fff5f5;border:1px solid #ffcdd2;border-radius:9px;padding:10px 13px;color:var(--danger);font-size:12px;line-height:1.5;display:none}
+.err.on{display:block}
+.gen-wrap{padding:14px 18px;border-top:1px solid var(--border);background:var(--card);flex-shrink:0}
+.gen{width:100%;padding:14px;background:var(--green);color:#fff;border:none;border-radius:9px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer}
+.gen:disabled{opacity:.4;cursor:not-allowed}
+
+/* 동적 필드 */
+.dyn-fields{display:none;background:var(--bg);border-radius:12px;padding:14px;margin-top:10px;border:1px solid var(--border)}
+.dyn-fields.on{display:block}
+.dyn-fields .fr{margin-bottom:10px}
+.dyn-fields label{font-size:11px;color:var(--green);font-weight:600}
+.dyn-fields input,.dyn-fields textarea{font-size:13px;padding:9px 11px;border-radius:8px}
+.dyn-group{margin-bottom:14px}
+.dyn-group-t{font-size:11px;font-weight:700;color:var(--green);margin-bottom:8px;display:flex;align-items:center;gap:5px}
+.dyn-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dyn-row .fr{margin-bottom:8px}
+
+/* 빈/로딩/결과 */
+.empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:var(--muted);gap:10px;min-height:300px}
+.empty-i{font-size:42px;opacity:.4}
+.load{display:none;background:var(--card);border-radius:14px;border:1px solid var(--border);padding:24px 20px;text-align:center}
+.load.on{display:block}
+.load-s{font-size:12px;font-weight:600;color:var(--green);margin-bottom:14px}
+.load-bw{height:4px;background:var(--border);border-radius:99px;overflow:hidden;margin-bottom:12px}
+.load-b{height:100%;background:linear-gradient(90deg,var(--gm),var(--green));border-radius:99px;width:0%;transition:width .5s}
+.sbox{background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:12px;font-size:11px;line-height:1.7;white-space:pre-wrap;min-height:50px;max-height:140px;overflow-y:auto;text-align:left;word-break:break-all;margin-top:10px}
+.rb{background:var(--card);border-radius:14px;border:1px solid var(--border);display:none}
+.rb.on{display:block}
+.rh{background:var(--green);color:#fff;padding:13px 18px;display:flex;align-items:center;justify-content:space-between;border-radius:14px 14px 0 0}
+.rh-t{font-size:14px;font-weight:700}
+.rh-m{font-size:11px;opacity:.85}
+.rbd{padding:18px}
+.tcs{display:flex;flex-direction:column;gap:9px}
+.tc{background:var(--bg);border:1.5px solid var(--border);border-radius:9px;padding:12px 14px;display:flex;align-items:flex-start;gap:10px}
+.tc-n{width:22px;height:22px;border-radius:50%;background:var(--green);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.tc-x{flex:1;font-size:13px;font-weight:500;line-height:1.5}
+.tc-c{font-size:11px;border:1px solid var(--border);border-radius:6px;padding:5px 9px;background:#fff;cursor:pointer;font-family:inherit;color:var(--muted);white-space:nowrap;flex-shrink:0}
+.tc-c:hover{border-color:var(--green);color:var(--green)}
+.tc-c.ok{background:var(--green);color:#fff;border-color:var(--green)}
+.kg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.kc{background:var(--bg);border-radius:9px;padding:11px 13px;border:1px solid var(--border)}
+.kl{font-size:10px;color:var(--muted);margin-bottom:4px}
+.kv{font-size:12px;font-weight:600;color:var(--green);word-break:break-all;line-height:1.4}
+.bt{font-size:13px;line-height:2;background:var(--bg);border-radius:9px;padding:16px;border:1px solid var(--border);white-space:pre-line}
+.tw{display:flex;flex-wrap:wrap;gap:6px}
+.tag{background:var(--gl);color:var(--green2);border-radius:99px;padding:5px 12px;font-size:11px;font-weight:500;cursor:pointer}
+.tag:hover{background:var(--gm);color:#fff}
+.et{font-size:13px;line-height:1.85;background:var(--bg);border-radius:9px;padding:14px;border:1px solid var(--border);white-space:pre-line}
+.cp{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:11px;background:var(--green);color:#fff;border:none;border-radius:9px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;margin-top:12px}
+.cp:hover{background:var(--green2)}
+.cp.ok{background:#388e3c}
+.dv{height:1px;background:var(--border);margin:16px 0}
+.sl{font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin-bottom:8px}
+.ar{display:flex;gap:8px;margin-top:14px}
+.ab{flex:1;padding:12px;border-radius:9px;border:1.5px solid var(--border);background:#fff;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;text-align:center}
+.ab:hover{background:var(--bg)}
+.ab.p{background:var(--green);color:#fff;border-color:var(--green)}
+
+/* 썸네일 5개 그리드 */
+.thumb-grid{display:flex;flex-direction:column;gap:8px}
+.thumb-item{background:var(--bg);border:1.5px solid var(--border);border-radius:9px;padding:12px 14px;display:flex;align-items:center;gap:10px}
+.thumb-item .tc-n{width:20px;height:20px;font-size:10px;background:var(--green)}
+.thumb-item .tc-x{flex:1;font-size:13px;font-weight:500;line-height:1.5}
+/* 썸네일 이미지 생성 영역 */
+.thumb-gen-area{margin-top:20px;padding-top:16px;border-top:1.5px solid var(--border)}
+.thumb-gen-area .sl{margin-bottom:10px}
+.thumb-style-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.thumb-style-btn{padding:7px 14px;border-radius:20px;border:1.5px solid var(--border);background:#fff;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s}
+.thumb-style-btn.on{background:var(--green);color:#fff;border-color:var(--green)}
+.thumb-img-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.thumb-img-wrap{position:relative;border-radius:10px;overflow:hidden;border:1.5px solid var(--border);aspect-ratio:16/9;cursor:pointer;transition:transform .15s}
+.thumb-img-wrap:hover{transform:scale(1.02)}
+.thumb-img-wrap canvas{width:100%;height:100%;display:block}
+.thumb-img-wrap .thumb-dl{position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;opacity:0;transition:opacity .2s}
+.thumb-img-wrap:hover .thumb-dl{opacity:1}
+.thumb-dl-all{width:100%;padding:11px;background:var(--green);color:#fff;border:none;border-radius:9px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;margin-top:10px}
+.thumb-dl-all:hover{opacity:.9}
+
+/* 미리보기 */
+.preview-wrap{padding:20px}
+.preview-post{max-width:680px;margin:0 auto;background:#fff;border-radius:14px;border:1px solid var(--border);overflow:hidden}
+.preview-post-title{font-size:20px;font-weight:700;padding:24px 24px 16px;border-bottom:2px solid var(--green);line-height:1.5}
+.preview-post-body{padding:24px;font-size:14px;line-height:2.2;color:#333}
+.preview-post-body p{margin-bottom:8px;white-space:pre-line}
+.preview-post-body .pp-img{margin:20px 0;border-radius:8px;overflow:hidden;text-align:center;background:var(--bg)}
+.preview-post-body .pp-img img{max-width:100%;display:block;margin:0 auto}
+.preview-post-body .pp-img-empty{padding:40px 20px;text-align:center;background:var(--bg);border-radius:8px;margin:20px 0}
+.preview-post-body .pp-img-empty-ico{font-size:28px;margin-bottom:6px}
+.preview-post-body .pp-img-empty-txt{font-size:12px;color:#bbb}
+.preview-post-tags{padding:16px 24px;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;gap:6px}
+.preview-post-tags span{color:var(--green);font-size:13px}
+.preview-no{text-align:center;padding:60px;color:var(--muted)}
+.preview-no-ico{font-size:40px;opacity:.4;margin-bottom:10px}
+.preview-no-txt{font-size:14px}
+
+@media(max-width:900px){
+  body{overflow:auto;height:auto;min-height:100vh}
+  .main{flex-direction:column}
+  .left{width:100%;border-right:none;border-bottom:1px solid var(--border);overflow:visible}
+  .left-body{overflow:visible}
+  .right{overflow:visible;height:auto}
+  .tg{grid-template-columns:repeat(5,1fr)}
+  .dyn-row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- 설정 모달 -->
+<div class="modal" id="modal">
+  <div class="modal-box" style="max-width:500px">
+    <div class="modal-t">API 설정</div>
+    <div class="modal-d">API 키를 입력하면 브라우저에 저장돼요. 한번 저장하면 다시 입력 안 해도 돼요.</div>
+    <div class="modal-e" id="me"></div>
+
+    <div style="margin-bottom:16px">
+      <div style="font-size:12px;font-weight:700;color:#2d6a4f;margin-bottom:8px;display:flex;align-items:center;gap:6px">
+        <span style="width:8px;height:8px;border-radius:50%;flex-shrink:0" id="dotClaude"></span>
+        Claude API 키 (포스팅 생성용)
+      </div>
+      <div style="font-size:11px;color:#888;margin-bottom:6px"><a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:#2d6a4f">console.anthropic.com</a> 에서 발급</div>
+      <input type="password" class="modal-in" id="ak" placeholder="sk-ant-api03-..." style="margin-bottom:4px">
+    </div>
+
+    <div style="margin-bottom:16px">
+      <div style="font-size:12px;font-weight:700;color:#03c75a;margin-bottom:8px;display:flex;align-items:center;gap:6px">
+        <span style="width:8px;height:8px;border-radius:50%;flex-shrink:0" id="dotNaver"></span>
+        네이버 API 키 (업장 정보 검색용)
+      </div>
+      <div style="font-size:11px;color:#888;margin-bottom:6px"><a href="https://developers.naver.com/apps/#/register" target="_blank" style="color:#03c75a">developers.naver.com</a> 에서 발급 (검색 API 선택)</div>
+      <input type="text" class="modal-in" id="nid" placeholder="Client ID" style="margin-bottom:6px">
+      <input type="password" class="modal-in" id="nsec" placeholder="Client Secret">
+    </div>
+
+    <div id="saveMsg" style="font-size:12px;color:#2d6a4f;margin-bottom:10px;display:none;background:#e8f5ee;border-radius:7px;padding:8px 12px;text-align:center"></div>
+
+    <div style="display:flex;gap:8px">
+      <button class="modal-b" onclick="saveKeys()" style="flex:1">저장하기</button>
+      <button class="modal-b" onclick="closeModal()" style="flex:1;background:#888">닫기</button>
+    </div>
+  </div>
+</div>
+
+<div class="hd">
+  <div class="hd-l">잰잇 블로그 스튜디오 v4</div>
+  <div class="hd-r">
+    <div class="hd-st" onclick="openSettings()" title="API 설정"><span id="stx">설정</span></div>
+    <div class="hd-st" id="statusBadge"><div class="hd-dot" id="dot"></div><span id="stxStatus">API 미연결</span></div>
+  </div>
+</div>
+
+<div class="main">
+  <!-- 왼쪽 입력 -->
+  <div class="left">
+    <div class="left-body">
+
+      <!-- STEP 1: 제목 & 메모 -->
+      <div class="sec">
+        <div class="sec-t"><div class="sec-n">1</div>업체명 / 대상 & 메모</div>
+        <div class="fr"><label>업체명 또는 대상 이름 *</label><input type="text" id="ti" placeholder="예: 속초옥수수소금빵, 다이슨 에어랩, 리스본 타임아웃마켓"><div class="hint">지역명+업체명+키워드 순서 = SEO 유리</div></div>
+        <div class="fr"><label>추가 메모 (선택)</label><textarea id="mi" rows="2" placeholder="꼭 넣고 싶은 내용, 특이사항 등"></textarea></div>
+      </div>
+
+      <!-- STEP 2: 글 유형 -->
+      <div class="sec">
+        <div class="sec-t"><div class="sec-n">2</div>글 유형</div>
+        <div class="tg">
+          <button class="tb" onclick="selectType(this,'맛집')"><em>🍜</em>맛집</button>
+          <button class="tb" onclick="selectType(this,'카페')"><em>☕</em>카페</button>
+          <button class="tb" onclick="selectType(this,'여행')"><em>✈️</em>여행</button>
+          <button class="tb" onclick="selectType(this,'숙소')"><em>🏨</em>숙소</button>
+          <button class="tb" onclick="selectType(this,'캠핑')"><em>⛺</em>캠핑</button>
+          <button class="tb" onclick="selectType(this,'미용')"><em>💅</em>미용</button>
+          <button class="tb" onclick="selectType(this,'쇼핑')"><em>🛍️</em>쇼핑</button>
+          <button class="tb" onclick="selectType(this,'투어')"><em>🗺️</em>투어</button>
+          <button class="tb" onclick="selectType(this,'전시')"><em>🎨</em>전시</button>
+          <button class="tb" onclick="selectType(this,'가전')"><em>🖥️</em>가전</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: 공통 + 유형별 입력 -->
+      <div class="sec">
+        <div class="sec-t"><div class="sec-n">3</div>상세 정보 입력</div>
+        <div class="fr"><label>방문/경험 내용 *</label><textarea id="ci" rows="5" placeholder="경험을 자유롭게 적어주세요 (맛, 분위기, 느낌 등)"></textarea><div class="hint">구체적일수록 자연스러운 후기가 만들어져요</div></div>
+
+        <!-- 공통 추가 필드 -->
+        <div class="dyn-fields on" id="commonFields">
+          <div class="dyn-group-t">📋 공통 정보 (입력할수록 글이 풍성해져요)</div>
+          <div class="dyn-row">
+            <div class="fr"><label>지역</label><input type="text" id="f_region" placeholder="예: 속초, 파리, 강남"></div>
+            <div class="fr"><label>방문일 / 사용일</label><input type="text" id="f_date" placeholder="예: 2026.10.15"></div>
+          </div>
+          <div class="dyn-row">
+            <div class="fr"><label>가격</label><input type="text" id="f_price" placeholder="예: 12,000원 / 무료"></div>
+            <div class="fr"><label>홈페이지 / 예약 링크</label><input type="text" id="f_url" placeholder="URL (선택)"></div>
+          </div>
+          <div class="dyn-row">
+            <div class="fr"><label>좋았던 점</label><textarea id="f_good" rows="2" placeholder="만족했던 부분"></textarea></div>
+            <div class="fr"><label>아쉬운 점</label><textarea id="f_bad" rows="2" placeholder="아쉬웠던 부분"></textarea></div>
+          </div>
+          <div class="fr"><label>선택한 이유 / 고민했던 점</label><textarea id="f_reason" rows="2" placeholder="왜 여기를 갔는지, 뭐가 고민이었는지"></textarea></div>
+        </div>
+
+        <!-- 맛집/카페 전용 -->
+        <div class="dyn-fields" id="fields_food">
+          <div class="dyn-group-t">🍜 맛집/카페 추가 정보</div>
+          <div class="dyn-row">
+            <div class="fr"><label>주문 메뉴</label><input type="text" id="f_menu" placeholder="예: 옥수수소금빵 4개 세트"></div>
+            <div class="fr"><label>추천 메뉴</label><input type="text" id="f_recommend" placeholder="꼭 먹어야 하는 메뉴"></div>
+          </div>
+          <div class="dyn-row">
+            <div class="fr"><label>웨이팅</label><input type="text" id="f_waiting" placeholder="예: 30분 대기, 없었음"></div>
+            <div class="fr"><label>주차</label><input type="text" id="f_parking" placeholder="예: 공영주차장 이용"></div>
+          </div>
+          <div class="dyn-row">
+            <div class="fr"><label>분위기</label><input type="text" id="f_vibe" placeholder="예: 아늑한 우드톤"></div>
+            <div class="fr"><label>재방문 의사</label><input type="text" id="f_revisit" placeholder="예: 무조건 재방문!"></div>
+          </div>
+        </div>
+
+        <!-- 여행/숙소/캠핑/투어 전용 -->
+        <div class="dyn-fields" id="fields_travel">
+          <div class="dyn-group-t">✈️ 여행 추가 정보</div>
+          <div class="dyn-row">
+            <div class="fr"><label>국가 / 도시</label><input type="text" id="f_country" placeholder="예: 포르투갈 리스본"></div>
+            <div class="fr"><label>일정</label><input type="text" id="f_schedule" placeholder="예: 15일 (6.17~7.1)"></div>
+          </div>
+          <div class="dyn-row">
+            <div class="fr"><label>숙소</label><input type="text" id="f_hotel" placeholder="예: 마이스토리 호텔 테조"></div>
+            <div class="fr"><label>이동 방법</label><input type="text" id="f_transport" placeholder="예: 도보+메트로"></div>
+          </div>
+          <div class="dyn-row">
+            <div class="fr"><label>총비용</label><input type="text" id="f_budget" placeholder="예: 1인 200만원"></div>
+            <div class="fr"><label>꿀팁</label><textarea id="f_tips" rows="2" placeholder="다른 사람에게 알려주고 싶은 팁"></textarea></div>
+          </div>
+        </div>
+
+        <!-- 쇼핑/미용 전용 -->
+        <div class="dyn-fields" id="fields_shopping">
+          <div class="dyn-group-t">🛍️ 쇼핑/미용 추가 정보</div>
+          <div class="dyn-row">
+            <div class="fr"><label>구매 혜택</label><input type="text" id="f_benefit" placeholder="예: 10% 할인, 사은품"></div>
+            <div class="fr"><label>착용감 / 사용감</label><input type="text" id="f_feel" placeholder="예: 가볍고 편안함"></div>
+          </div>
+          <div class="dyn-row">
+            <div class="fr"><label>디자인</label><input type="text" id="f_design" placeholder="예: 미니멀, 예쁨"></div>
+            <div class="fr"><label>AS / 보증</label><input type="text" id="f_as" placeholder="예: 1년 무상 AS"></div>
+          </div>
+          <div class="dyn-row">
+            <div class="fr"><label>비교 브랜드</label><input type="text" id="f_compare" placeholder="고민했던 다른 브랜드"></div>
+            <div class="fr"><label>가격대</label><input type="text" id="f_priceRange" placeholder="예: 3~5만원대"></div>
+          </div>
+        </div>
+
+        <!-- 가전 전용 -->
+        <div class="dyn-fields" id="fields_tech">
+          <div class="dyn-group-t">🖥️ 가전제품 추가 정보</div>
+          <div class="dyn-row">
+            <div class="fr"><label>구매 제품</label><input type="text" id="f_product" placeholder="예: 다이슨 에어랩 멀티"></div>
+            <div class="fr"><label>구매 가격</label><input type="text" id="f_techPrice" placeholder="예: 698,000원"></div>
+          </div>
+          <div class="dyn-row">
+            <div class="fr"><label>비교 제품</label><input type="text" id="f_vsProduct" placeholder="고민했던 다른 제품"></div>
+            <div class="fr"><label>사용 기간</label><input type="text" id="f_usePeriod" placeholder="예: 3개월"></div>
+          </div>
+          <div class="dyn-row">
+            <div class="fr"><label>만족도</label><input type="text" id="f_satisfaction" placeholder="예: 5점 만점에 4.5점"></div>
+            <div class="fr"><label>추천하는 사람</label><input type="text" id="f_forWho" placeholder="예: 출장 잦은 직장인"></div>
+          </div>
+          <div class="dyn-row">
+            <div class="fr"><label>장점</label><textarea id="f_pros" rows="2" placeholder="구체적인 장점"></textarea></div>
+            <div class="fr"><label>단점</label><textarea id="f_cons" rows="2" placeholder="구체적인 단점"></textarea></div>
+          </div>
+        </div>
+
+        <div class="fr" style="margin-top:12px"><label>장소 정보 (주소/영업시간/가격 직접 입력)</label><textarea id="ii" rows="2" placeholder="네이버 API 연동 시 자동 수집 — 직접 입력도 가능"></textarea></div>
+      </div>
+
+      <!-- STEP 4: 사진 -->
+      <div class="sec">
+        <div class="sec-t"><div class="sec-n">4</div>사진 업로드 (선택)</div>
+        <div class="up" onclick="document.getElementById('fi').click()">
+          <div style="font-size:24px;margin-bottom:5px">📸</div>
+          <div class="up-t"><strong>클릭해서 사진 선택</strong></div>
+          <div style="font-size:10px;color:#bbb;margin-top:3px">JPG, PNG · 자동 압축 · AI가 사진 분석 후 배치</div>
+        </div>
+        <input type="file" id="fi" multiple accept="image/*" onchange="addImg(event)">
+        <div class="cn" id="cnote"></div>
+        <div class="pg" id="pg"></div>
+        <div class="pc" id="pcnt"></div>
+      </div>
+
+      <!-- STEP 5: 분량 -->
+      <div class="sec">
+        <div class="sec-t"><div class="sec-n">5</div>글 분량 선택</div>
+        <div class="vl">
+          <label class="vb" onclick="sv(this,'short')"><input type="radio" name="v"><span style="font-size:17px">📝</span><div><div class="vb-l">적게 — 800~1,000자</div><div class="vb-d">핵심 위주 · 간결한 후기</div></div></label>
+          <label class="vb on" onclick="sv(this,'normal')"><input type="radio" name="v" checked><span style="font-size:17px">📄</span><div><div class="vb-l">보통 — 1,500~1,800자 (추천)</div><div class="vb-d">정보+감상 균형 · 네이버 SEO 최적</div></div></label>
+          <label class="vb" onclick="sv(this,'long')"><input type="radio" name="v"><span style="font-size:17px">📚</span><div><div class="vb-l">많이 — 1,800~2,100자</div><div class="vb-d">팁+총평 포함 · C-Rank에 유리</div></div></label>
+        </div>
+      </div>
+      <div class="err" id="eb" style="margin-bottom:10px"></div>
+    </div>
+    <div class="gen-wrap">
+      <button class="gen" id="gb" onclick="gen()">Claude AI로 포스팅 생성하기</button>
+    </div>
+  </div>
+
+  <!-- 오른쪽 결과 + 미리보기 -->
+  <div style="flex:1;display:flex;flex-direction:column;min-height:0">
+    <div class="tab-bar">
+      <button class="tab-btn on" id="tabResult" onclick="switchTab('result')">📊 생성 결과</button>
+      <button class="tab-btn" id="tabPreview" onclick="switchTab('preview')">👀 사진 미리보기</button>
+      <button class="tab-btn" id="tabSaved" onclick="switchTab('saved')">💾 저장된 글 <span id="savedCount" style="background:var(--green);color:#fff;border-radius:99px;padding:1px 6px;font-size:10px;margin-left:4px"></span></button>
+    </div>
+    <div class="right" id="rightResult" style="display:flex">
+      <div class="empty" id="empty">
+        <div class="empty-i">📝</div>
+        <div style="font-size:15px;color:#aaa">포스팅을 생성해보세요</div>
+        <div style="font-size:12px;color:#bbb;line-height:1.6">왼쪽에 내용을 입력하고<br>생성 버튼을 누르세요</div>
+      </div>
+      <div class="load" id="load">
+        <div class="load-s" id="lst">분석 중...</div>
+        <div class="load-bw"><div class="load-b" id="lb"></div></div>
+        <div style="font-size:10px;color:#bbb;text-align:left;margin-bottom:4px;font-weight:700">실시간 작성 중...</div>
+        <div class="sbox" id="sb"></div>
+      </div>
+      <!-- SEO 제목 5개 -->
+      <div class="rb" id="rb1"><div class="rh"><span class="rh-t">📌 SEO 제목 추천 5가지</span><span class="rh-m">검색 의도 기반 · 상단 노출 최적화</span></div><div class="rbd"><div class="tcs" id="tcs"></div></div></div>
+      <div class="rb" id="rb2"><div class="rh"><span class="rh-t">🔍 키워드 분석</span></div><div class="rbd"><div class="kg" id="kg"></div></div></div>
+      <div class="rb" id="rb6"><div class="rh"><span class="rh-t">📍 위치 정보</span><span class="rh-m">자동 검색 결과</span></div><div class="rbd">
+        <div id="placeInfo"></div>
+        <a id="naverMapLink" href="#" target="_blank" style="display:none;margin-top:12px;width:100%;padding:11px;background:#03c75a;color:#fff;border:none;border-radius:9px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;text-align:center;text-decoration:none">네이버 지도에서 보기</a>
+      </div></div>
+      <div class="rb" id="rb3"><div class="rh"><span class="rh-t">📝 블로그 본문</span><span class="rh-m" id="cc"></span></div><div class="rbd"><div class="bt" id="btxt"></div><button class="cp" onclick="cpId('btxt',this)">📋 본문 전체 복사</button></div></div>
+      <div class="rb" id="rb4"><div class="rh"><span class="rh-t">🏷️ 해시태그</span></div><div class="rbd"><div class="tw" id="tw"></div><button class="cp" onclick="cpTags(this)">📋 해시태그 전체 복사</button></div></div>
+      <div class="rb" id="rb5"><div class="rh"><span class="rh-t">🎬 릴스 자막 & 썸네일 문구 5가지</span></div><div class="rbd">
+        <div class="sl">릴스 / 숏폼 자막</div><div class="et" id="rt"></div><button class="cp" onclick="cpId('rt',this)">📋 자막 복사</button>
+        <div class="dv"></div>
+        <div class="sl">썸네일 문구 5가지</div><div class="thumb-grid" id="thumbGrid"></div>
+        <button class="cp" onclick="cpThumbs(this)" style="margin-top:12px">📋 썸네일 전체 복사</button>
+        <div class="thumb-gen-area">
+          <div class="sl">🖼️ 썸네일 이미지 생성</div>
+          <div class="thumb-style-row" id="thumbStyleRow">
+            <button class="thumb-style-btn on" onclick="setThumbStyle(this,'dark')">🖤 다크</button>
+            <button class="thumb-style-btn" onclick="setThumbStyle(this,'light')">🤍 라이트</button>
+            <button class="thumb-style-btn" onclick="setThumbStyle(this,'green')">💚 민트</button>
+            <button class="thumb-style-btn" onclick="setThumbStyle(this,'warm')">🧡 웜톤</button>
+            <button class="thumb-style-btn" onclick="setThumbStyle(this,'photo')">📷 사진배경</button>
+          </div>
+          <div class="thumb-img-grid" id="thumbImgGrid"></div>
+          <button class="thumb-dl-all" onclick="downloadAllThumbs()" id="thumbDlAll" style="display:none">📥 썸네일 전체 다운로드</button>
+        </div>
+        <div class="ar"><button class="ab p" onclick="cpAll()">📋 전체 복사</button><button class="ab" onclick="savePost()" id="saveBtn">💾 저장</button><button class="ab" onclick="reset()">🔄 새로 작성</button></div>
+      </div></div>
+    </div>
+    <div class="right" id="rightPreview" style="display:none">
+      <div id="previewArea"></div>
+    </div>
+    <div class="right" id="rightSaved" style="display:none">
+      <div style="background:#e8f5ee;border:1.5px solid #74c69d;border-radius:12px;padding:14px 16px;margin-bottom:14px">
+        <div style="font-size:12px;font-weight:700;color:#1b4332;margin-bottom:4px">🔄 기기 간 동기화</div>
+        <div style="font-size:11px;color:#555;line-height:1.6;margin-bottom:10px">저장된 글은 이 브라우저에만 보관돼요. 다른 기기에서 보려면 내보내기 → 그 기기에서 가져오기 하세요.</div>
+        <div style="display:flex;gap:6px">
+          <button onclick="exportPosts()" style="flex:1;padding:9px;background:#2d6a4f;color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer">📤 내보내기 (파일 저장)</button>
+          <button onclick="g('importFile').click()" style="flex:1;padding:9px;background:#fff;color:#2d6a4f;border:1.5px solid #2d6a4f;border-radius:8px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer">📥 가져오기</button>
+          <input type="file" id="importFile" accept=".json" style="display:none" onchange="importPosts(event)">
+        </div>
+      </div>
+      <div id="savedList"></div>
+      <div id="savedEmpty" style="text-align:center;padding:60px;color:#bbb">
+        <div style="font-size:40px;opacity:.4;margin-bottom:10px">💾</div>
+        <div style="font-size:14px;color:#aaa">저장된 글이 없어요</div>
+        <div style="font-size:12px;margin-top:6px">포스팅 생성 후 💾 저장 버튼을 누르세요</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var sT='',sV='normal',imgs=[],API_KEY='',NAVER_ID='',NAVER_SEC='',resultData=null;
+
+/* ── 유형별 필드 매핑 ── */
+var typeFieldMap={
+  '맛집':['fields_food'],'카페':['fields_food'],
+  '여행':['fields_travel'],'숙소':['fields_travel'],'캠핑':['fields_travel'],'투어':['fields_travel'],
+  '쇼핑':['fields_shopping'],'미용':['fields_shopping'],
+  '전시':[],
+  '가전':['fields_tech']
+};
+
+function selectType(b,t){
+  document.querySelectorAll('.tb').forEach(function(x){x.classList.remove('on');});
+  b.classList.add('on');sT=t;
+  /* 동적 필드 표시 */
+  ['fields_food','fields_travel','fields_shopping','fields_tech'].forEach(function(id){
+    g(id).classList.remove('on');
+  });
+  var show=typeFieldMap[t]||[];
+  show.forEach(function(id){g(id).classList.add('on');});
+}
+
+/* ── 설정 관리 ── */
+function loadKeys(){
+  API_KEY=localStorage.getItem('jaeinit_claude_key')||'';
+  NAVER_ID=localStorage.getItem('jaeinit_naver_id')||'';
+  NAVER_SEC=localStorage.getItem('jaeinit_naver_sec')||'';
+  updateStatus();
+  if(!API_KEY) g('modal').className='modal';
+  else g('modal').className='modal hide';
+}
+
+function saveKeys(){
+  var ak=g('ak').value.trim();
+  var nid=g('nid').value.trim();
+  var nsec=g('nsec').value.trim();
+  var msg=g('saveMsg');
+  if(ak&&ak.indexOf('sk-ant-')!==0){
+    g('me').textContent='Claude API 키는 sk-ant- 로 시작해야 해요';g('me').className='modal-e on';return;
+  }
+  g('me').className='modal-e';
+  if(ak){API_KEY=ak;localStorage.setItem('jaeinit_claude_key',ak);}
+  if(nid){NAVER_ID=nid;localStorage.setItem('jaeinit_naver_id',nid);}
+  if(nsec){NAVER_SEC=nsec;localStorage.setItem('jaeinit_naver_sec',nsec);}
+  updateStatus();
+  msg.textContent='저장 완료! 브라우저에 안전하게 저장됐어요.';
+  msg.style.display='block';
+  setTimeout(function(){msg.style.display='none';},3000);
+}
+
+function openSettings(){
+  g('ak').value=API_KEY||'';
+  g('nid').value=NAVER_ID||'';
+  g('nsec').value=NAVER_SEC||'';
+  g('me').className='modal-e';
+  g('saveMsg').style.display='none';
+  updateSettingsDots();
+  g('modal').className='modal';
+}
+function closeModal(){g('modal').className='modal hide';}
+
+function updateStatus(){
+  var hasClaude=!!API_KEY, hasNaver=!!(NAVER_ID&&NAVER_SEC);
+  var dot=g('dot');
+  var stx=g('stxStatus');
+  if(hasClaude&&hasNaver){dot.className='hd-dot on';stx.textContent='Claude+네이버 연결됨';}
+  else if(hasClaude){dot.className='hd-dot on';stx.textContent='Claude 연결됨';}
+  else{dot.className='hd-dot';stx.textContent='API 미연결';}
+  updateSettingsDots();
+}
+
+function updateSettingsDots(){
+  var dc=g('dotClaude'),dn=g('dotNaver');
+  if(dc) dc.style.background=API_KEY?'#2d6a4f':'#ff6b6b';
+  if(dn) dn.style.background=(NAVER_ID&&NAVER_SEC)?'#03c75a':'#ff6b6b';
+}
+
+/* ── 네이버 지역검색 API ── */
+async function searchNaver(query){
+  if(!NAVER_ID||!NAVER_SEC) return null;
+  try{
+    var res=await fetch('https://openapi.naver.com/v1/search/local.json?query='+encodeURIComponent(query)+'&display=1',{
+      headers:{'X-Naver-Client-Id':NAVER_ID,'X-Naver-Client-Secret':NAVER_SEC}
+    });
+    if(!res.ok) return null;
+    var data=await res.json();
+    if(data.items&&data.items.length>0){
+      var item=data.items[0];
+      return {
+        name:item.title.replace(/<[^>]*>/g,''),
+        address:item.roadAddress||item.address||'',
+        tel:item.telephone||'',
+        category:item.category||'',
+        link:item.link||'',
+        mapx:item.mapx||'',
+        mapy:item.mapy||''
+      };
+    }
+  }catch(e){console.log('네이버 검색 오류:',e);}
+  return null;
+}
+
+function g(id){return document.getElementById(id);}
+function sv(b,v){document.querySelectorAll('.vb').forEach(function(x){x.classList.remove('on');});b.classList.add('on');sV=v;}
+
+/* 탭 전환 */
+function switchTab(tab){
+  g('tabResult').className='tab-btn'+(tab==='result'?' on':'');
+  g('tabPreview').className='tab-btn'+(tab==='preview'?' on':'');
+  g('tabSaved').className='tab-btn'+(tab==='saved'?' on':'');
+  g('rightResult').style.display=tab==='result'?'flex':'none';
+  g('rightPreview').style.display=tab==='preview'?'flex':'none';
+  g('rightSaved').style.display=tab==='saved'?'flex':'none';
+  if(tab==='preview') renderPreview();
+  if(tab==='saved') renderSavedList();
+}
+
+/* 이미지 압축 */
+function compress(file,cb){
+  var r=new FileReader();r.onload=function(ev){var im=new Image();im.onload=function(){
+    var w=im.width,h=im.height,ra=Math.min(1400/w,1400/h,1);w=Math.round(w*ra);h=Math.round(h*ra);
+    var cv=document.createElement('canvas');cv.width=w;cv.height=h;cv.getContext('2d').drawImage(im,0,0,w,h);
+    cb(cv.toDataURL('image/jpeg',0.82));};im.src=ev.target.result;};r.readAsDataURL(file);
+}
+function addImg(e){
+  var fs=Array.from(e.target.files),dn=0,cp2=0;
+  fs.forEach(function(f){var os=f.size;compress(f,function(src){
+    imgs.push(src);if(Math.round(src.length*.75)<os)cp2++;
+    var w=document.createElement('div');w.className='pi';
+    var im=document.createElement('img');im.src=src;
+    var num=document.createElement('div');num.className='pi-n';num.textContent=(imgs.length);
+    var db=document.createElement('button');db.className='db';db.textContent='✕';
+    (function(s,wr){db.onclick=function(){wr.remove();imgs=imgs.filter(function(x){return x!==s;});reNumber();};})(src,w);
+    w.appendChild(im);w.appendChild(num);w.appendChild(db);g('pg').appendChild(w);dn++;
+    if(dn===fs.length){reNumber();if(cp2>0){g('cnote').textContent=''+cp2+'장 자동 압축 완료';g('cnote').className='cn on';}}
+  });});
+}
+function reNumber(){
+  var items=g('pg').querySelectorAll('.pi');
+  items.forEach(function(el,i){el.querySelector('.pi-n').textContent=(i+1);});
+  g('pcnt').textContent=imgs.length>0?'총 '+imgs.length+'장 업로드됨':'';
+}
+
+/* 로딩 */
+function anim(){
+  var ss=[{l:'📊 제목 분석 중...',p:10},{l:'🔍 키워드 추출 중...',p:25},{l:'✍️ 본문 작성 중...',p:55},{l:'🎯 SEO 최적화 중...',p:80},{l:'🖼️ 썸네일 문구 생성 중...',p:92},{l:'✅ 완성!',p:100}];
+  var k=0;function tk(){if(k>=ss.length)return;g('lst').textContent=ss[k].l;g('lb').style.width=ss[k].p+'%';k++;setTimeout(tk,1200);}tk();
+}
+
+/* ── 유형별 추가 정보 수집 ── */
+function collectTypeFields(){
+  var lines=[];
+  /* 공통 */
+  var flds=[
+    ['f_region','지역'],['f_date','방문일/사용일'],['f_price','가격'],['f_url','홈페이지/예약링크'],
+    ['f_good','좋았던 점'],['f_bad','아쉬운 점'],['f_reason','선택한 이유/고민했던 점']
+  ];
+  flds.forEach(function(f){var v=(g(f[0])||{}).value;if(v&&v.trim())lines.push(f[1]+': '+v.trim());});
+
+  /* 맛집/카페 */
+  if(sT==='맛집'||sT==='카페'){
+    [['f_menu','주문 메뉴'],['f_recommend','추천 메뉴'],['f_waiting','웨이팅'],['f_parking','주차'],['f_vibe','분위기'],['f_revisit','재방문 의사']].forEach(function(f){
+      var v=(g(f[0])||{}).value;if(v&&v.trim())lines.push(f[1]+': '+v.trim());});
+  }
+  /* 여행 */
+  if(sT==='여행'||sT==='숙소'||sT==='캠핑'||sT==='투어'){
+    [['f_country','국가/도시'],['f_schedule','일정'],['f_hotel','숙소'],['f_transport','이동 방법'],['f_budget','총비용'],['f_tips','꿀팁']].forEach(function(f){
+      var v=(g(f[0])||{}).value;if(v&&v.trim())lines.push(f[1]+': '+v.trim());});
+  }
+  /* 쇼핑/미용 */
+  if(sT==='쇼핑'||sT==='미용'){
+    [['f_benefit','구매 혜택'],['f_feel','착용감/사용감'],['f_design','디자인'],['f_as','AS/보증'],['f_compare','비교 브랜드'],['f_priceRange','가격대']].forEach(function(f){
+      var v=(g(f[0])||{}).value;if(v&&v.trim())lines.push(f[1]+': '+v.trim());});
+  }
+  /* 가전 */
+  if(sT==='가전'){
+    [['f_product','구매 제품'],['f_techPrice','구매 가격'],['f_vsProduct','비교 제품'],['f_usePeriod','사용 기간'],['f_satisfaction','만족도'],['f_forWho','추천하는 사람'],['f_pros','장점'],['f_cons','단점']].forEach(function(f){
+      var v=(g(f[0])||{}).value;if(v&&v.trim())lines.push(f[1]+': '+v.trim());});
+  }
+  return lines.join('\n');
+}
+
+function buildPrompt(t,m,c,info){
+  var vm={short:'800~1000자 (공백 포함 기준, 최소 800자 이상)',normal:'1500~1800자 (공백 포함 기준, 최소 1500자 이상)',long:'1800~2100자 (공백 포함 기준, 최소 1800자 이상)'};
+  var typeExtra=collectTypeFields();
+
+  /* 유형별 글 구성 순서 */
+  var structMap={
+    '맛집':'도입 → 기본정보 → 위치 및 주차 → 웨이팅 및 예약 → 외관 및 내부 → 메뉴 및 가격 → 실제 주문한 메뉴 후기 → 총평',
+    '카페':'도입 → 기본정보 → 위치 및 주차 → 웨이팅 및 예약 → 외관 및 내부 → 메뉴 및 가격 → 실제 주문한 메뉴 후기 → 총평',
+    '여행':'도입 → 기본정보 → 위치 및 가는 방법 → 예약 및 입장료 → 방문 과정 → 볼거리 및 후기 → 여행 팁 → 총평',
+    '숙소':'도입 → 기본정보 → 위치 및 가는 방법 → 예약 및 입장료 → 방문 과정 → 볼거리 및 후기 → 여행 팁 → 총평',
+    '캠핑':'도입 → 캠핑장 기본정보 → 위치 및 접근성 → 예약한 사이트 → 사이트 상세 후기 → 편의시설 → 애견동반 관련 정보(해당 시) → 장단점 및 이용 팁 → 총평',
+    '투어':'도입 → 기본정보 → 위치 및 가는 방법 → 예약 및 입장료 → 방문 과정 → 볼거리 및 후기 → 여행 팁 → 총평',
+    '쇼핑':'도입 → 상품 소개 → 가격 및 종류 → 실제 구매 과정 → 사용 후기 → 장단점 → 총평',
+    '미용':'도입 → 기본정보 → 시술/서비스 과정 → 결과 후기 → 가격 → 총평',
+    '전시':'도입 → 기본정보 → 위치 및 가는 방법 → 예약 및 입장료 → 방문 과정 → 볼거리 및 후기 → 여행 팁 → 총평',
+    '가전':'도입 → 상품 소개 → 구매 이유 → 스펙 및 가격 → 사용 후기 → 장단점 비교 → 추천 대상 → 총평'
+  };
+  var struct=structMap[sT]||structMap['여행'];
+
+  return '당신은 네이버 여행 블로그를 운영하는 "잰잇"의 전담 콘텐츠 에디터입니다.\n'
+    +'주요 주제: 해외/국내여행, 캠핑, 애견동반 여행, 맛집/카페, 숙소, 관광지, 예약 팁\n'
+    +'가장 중요한 목표: AI가 작성한 홍보성 글이 아니라, 블로거가 직접 경험하고 작성한 자연스러운 후기처럼 만드는 것.\n'
+    +'반드시 아래 JSON만 출력하세요.\n\n'
+
+    +'[입력 정보]\n'
+    +'업체명/대상: '+t+'\n'
+    +'글 유형: '+sT+'\n'
+    +'경험 내용: '+c+'\n'
+    +'메모: '+(m||'없음')+'\n'
+    +'장소 정보: '+(info||'없음')+'\n'
+    +'분량: '+(vm[sV]||'1500~1800자')+'\n'
+    +'사진: '+imgs.length+'장\n'
+    +(typeExtra?'\n[유형별 상세 정보]\n'+typeExtra+'\n':'')
+
+    +'\n[업장 정보 자동 수집]\n'
+    +'- 업체명/장소명이 파악되면 웹 검색으로 정확한 주소, 영업시간, 가격대, 전화번호를 찾아 place_name, place_address, place_hours, place_price에 넣으세요\n'
+    +'- 확인할 수 없는 항목은 임의로 채우지 말고 빈 문자열로 두세요\n\n'
+
+    +'[잰잇 말투 규칙 — 반드시 따르세요]\n'
+    +'친구에게 직접 다녀온 이야기를 들려주듯 편안한 1인칭 대화체. ~요체 기본이되 모든 문장을 똑같은 종결형으로 끝내지 마세요.\n'
+    +'자연스럽게 섞어 쓸 표현 예시:\n'
+    +'- 생각보다 괜찮더라고요.\n- 개인적으로 이 부분이 제일 마음에 들었어요.\n- 사실 크게 기대 안 했는데..\n'
+    +'- 여기가 맞나..? 싶었음ㅋㅋ\n- 이건 은근 편했어요.\n- 살짝 아쉬웠던 부분.\n- 이 정도면 괜찮을 듯!\n'
+    +'- 저는 오히려 이쪽이 더 좋았어요.\n- 방문하실 분들은 참고하세요:)\n- ~해서 좋았음!\n- ~인 줄 알았는데 생각보다 괜찮았어요ㅎㅎ\n'
+    +'ㅎㅎ, ㅋㅋ, :), ~, .., ! 등 적절히 사용. 감탄사 억지로 넣지 않기.\n'
+    +'문장은 짧고 읽기 편하게. 한 문단 1~3문장. 같은 단어/표현 반복 금지.\n\n'
+
+    +'[절대 사용 금지 표현 — 하나라도 쓰면 실패]\n'
+    +'힐링 그 자체, 숨겨진 보석 같은 곳, 완벽한 조합, 눈과 입이 즐거운, 오감을 만족시키는, '
+    +'특별한 추억을 선사하는, 잊지 못할 경험, 매력적인 공간, 강력 추천합니다, 신의 한 수였어요, '
+    +'분위기가 물씬 풍기는, 캠핑의 퀄리티가 올라가는, 망설이지 말고 방문하세요, 이곳을 놓치지 마세요, '
+    +'무조건 가보세요, 인생 최고의 경험, 공감과 서이추 꾸욱 눌러주세요\n'
+    +'→ 과장된 감탄, 억지 감성, 광고 문구 모두 금지\n\n'
+
+    +'[글 구성 순서]\n'+struct+'\n'
+    +'소제목은 반드시 넣되 실제 콘텐츠 주제에 맞게 조정. 이모지는 소제목에만 적절히 사용.\n\n'
+
+    +'[도입부]\n'
+    +'"안녕하세요! 여행블로거 잰잇입니다"를 매번 반복하지 마세요. 방문 계기부터 자연스럽게 시작.\n'
+    +'예: "인스타에서 몇 번 보고 궁금했던 ~에 다녀왔어요." / "~여행 준비하면서 가장 먼저 예약했던 게 바로 ~였어요."\n\n'
+
+    +'[본문 흐름]\n'
+    +'직접 겪은 상황 → 구체적 설명 → 개인적 반응 → 독자에게 도움 되는 정보\n'
+    +'정보 전달 중간에 개인적인 생각이나 소소한 반응을 자연스럽게 넣으세요.\n'
+    +'장점만 나열하지 말고, 사용자가 언급한 아쉬운 점도 반드시 반영.\n\n'
+
+    +'[총평]\n'
+    +'전체 내용을 반복 나열하지 말고, 좋았던 점과 아쉬운 점을 짧게 정리하고 어떤 사람에게 적합한지 자연스럽게 마무리.\n'
+    +'예: "개인적으로 여기 하나만 보고 멀리서 찾아올 정도는 아니지만ㅋㅋ 근처에 왔다면 한번 들러볼 만한 곳이었어요."\n\n'
+
+    +'[사실 확인 — 반드시 지키세요]\n'
+    +'- 제공하지 않은 경험을 임의로 만들어내지 않습니다\n'
+    +'- 방문하지 않은 장소를 방문했다고 쓰지 않습니다\n'
+    +'- 주문하지 않은 메뉴를 먹었다고 쓰지 않습니다\n'
+    +'- 실제로 느끼지 않은 감정을 지어내지 않습니다\n'
+    +'- 웨이팅, 방문 요일, 날씨, 동행인, 이용 시간 등을 임의로 추가하지 않습니다\n'
+    +'- 확인되지 않은 가격이나 운영정보를 만들어내지 않습니다\n'
+    +'- 정보가 부족하면 해당 내용을 생략하세요\n\n'
+
+    +(imgs.length>0?'[⚠️ 사진 분석 — 반드시 지켜야 할 규칙]\n'
+    +'사진 '+imgs.length+'장이 첨부되어 있습니다.\n'
+    +'1단계: 각 사진을 하나씩 자세히 분석하세요. 사진 속에 무엇이 보이는지 (장소, 물건, 음식, 시설, 풍경, 텍스트 등) 정확히 파악하세요.\n'
+    +'2단계: 분석한 내용을 기반으로 본문을 작성하세요. 사진에 보이는 것만 묘사하세요.\n'
+    +'3단계: 본문에서 각 사진에 가장 어울리는 위치에 [사진1] [사진2] ... 태그를 배치하세요.\n'
+    +'※ [사진N] 태그 아래에 캡션을 넣지 마세요. 태그만 단독으로 배치합니다.\n\n'
+    +'⚠️ 절대 하지 말 것:\n'
+    +'- 사진 내용과 다른 설명 작성 (예: 샤워실 사진인데 "배치도" 라고 쓰기)\n'
+    +'- 사진에 없는 장면을 추측하거나 만들어내기\n'
+    +'- 사진을 대충 무시하고 일반적인 글 작성하기\n'
+    +'→ 사진이 곧 글의 근거입니다. 사진에 보이는 것을 중심으로 글을 전개하세요.\n\n'
+    +'JSON의 "photo_analysis" 필드에 각 사진 분석 결과를 간략히 적어주세요.\n\n':'')
+
+    +'[⚠️ 분량 — 가장 중요한 규칙]\n'
+    +'body 필드의 본문 글자수(공백 포함)가 반드시 '+(vm[sV]||'1500~1800자')+' 범위 안에 있어야 합니다.\n'
+    +'이 범위보다 짧으면 실패입니다. 글자수를 세면서 작성하세요.\n'
+    +'분량을 채우는 방법: 각 소제목 섹션에서 직접 겪은 상황을 더 구체적으로 묘사하고, 개인적 반응을 넣고, 독자에게 도움 되는 실용 정보를 추가하세요.\n'
+    +'같은 말을 반복하거나 없는 정보를 만들어서 채우지는 마세요.\n\n'
+
+    +'[SEO]\n'
+    +'제목 형식: 지역 + 핵심 검색 키워드 + 장소명 + 주요 특징 (30~35자)\n'
+    +'본문에 주요 키워드를 도입부, 관련 소제목, 총평에 자연스럽게 배치. 부자연스러운 반복 금지.\n\n'
+
+    +'[body규칙] 줄바꿈은 \\n, 순수 텍스트만, 마크다운 금지. 소제목 앞에 이모지 1개 포함 가능.\n\n'
+
+    +'[출력 JSON 형식] — title 5개, thumbnail 5개로 반드시 출력:\n'
+    +'body 필드는 공백 포함 '+(vm[sV]||'1500~1800자')+' 이상이어야 합니다. 짧으면 다시 작성하세요.\n'
+    +'{"title_1":"SEO 제목 1 (지역+키워드+장소명+특징, 30~35자)","title_2":"","title_3":"","title_4":"","title_5":"",'
+    +'"keyword_main":"","keyword_sub":"","keyword_location":"","keyword_intent":"",'
+    +'"place_name":"업체명","place_address":"정확한 주소","place_hours":"영업시간","place_price":"가격대",'
+    +'"body":"본문 (반드시 '+(vm[sV]||'1500~1800자')+' 공백 포함)",'
+    +'"hashtags":["#태그1","#태그2"],'
+    +'"reel":"릴스 숏폼 자막 (짧고 리듬감 있게, 처음 1~2줄에 관심을 끌 수 있는 문구)",'
+    +(imgs.length>0?'"photo_analysis":["사진1: 보이는 것 요약","사진2: ..."],':'')
+    +'"thumbnail_1":"메인 문구 (검색 키워드+장소 특징, 15자 이내)","thumbnail_2":"","thumbnail_3":"","thumbnail_4":"","thumbnail_5":""}';
+}
+
+async function gen(){
+  if(!API_KEY){openSettings();return;}
+  var t=g('ti').value.trim(),m=g('mi').value.trim(),c=g('ci').value.trim(),info=g('ii').value.trim();
+  var eb=g('eb');eb.className='err';
+  if(!t||!sT||!c){eb.textContent='업체명, 글 유형, 경험 내용을 모두 입력/선택해주세요!';eb.className='err on';return;}
+  if(!sV) sV='normal';
+  g('gb').disabled=true;g('empty').style.display='none';g('load').className='load on';
+  ['rb1','rb2','rb3','rb4','rb5','rb6'].forEach(function(id){g(id).className='rb';});
+  g('sb').textContent='';g('lb').style.width='0%';anim();
+  switchTab('result');
+
+  /* 네이버 지역검색 */
+  var naverData=null;
+  if(NAVER_ID&&NAVER_SEC){
+    g('sb').textContent='네이버 지도에서 업장 정보 검색 중...\n';
+    naverData=await searchNaver(t);
+    if(!naverData) naverData=await searchNaver(c.split(/[.,!?\n]/)[0]);
+    if(naverData) g('sb').textContent+=''+naverData.name+' 정보 찾음!\n\n';
+    else g('sb').textContent+='네이버 검색 결과 없음 — Claude가 웹 검색으로 대체합니다\n\n';
+  }
+
+  var fullInfo=info||'';
+  if(naverData){
+    fullInfo+='\n\n[네이버 지도 검색 결과]\n업체명: '+naverData.name+'\n';
+    if(naverData.address) fullInfo+='주소: '+naverData.address+'\n';
+    if(naverData.tel) fullInfo+='전화: '+naverData.tel+'\n';
+    if(naverData.category) fullInfo+='카테고리: '+naverData.category+'\n';
+  }
+
+  var uc=[];
+  imgs.forEach(function(b){var mm=b.match(/data:([^;]+);base64,/);uc.push({type:'image',source:{type:'base64',media_type:mm?mm[1]:'image/jpeg',data:b.replace(/^data:[^;]+;base64,/,'')}});});
+  uc.push({type:'text',text:buildPrompt(t,m,c,fullInfo)});
+
+  try{
+    var res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json','x-api-key':API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:8192,stream:true,tools:[{"type":"web_search_20250305","name":"web_search"}],messages:[{role:'user',content:uc}]})
+    });
+    if(!res.ok){var et='';try{et=await res.text();}catch(e){}var em='API 오류 '+res.status;
+      if(res.status===400){try{var ej=JSON.parse(et);em='요청 오류(400): '+(ej.error&&ej.error.message?ej.error.message:et).slice(0,200);}catch(e){em='오류(400): '+et.slice(0,200);}}
+      else if(res.status===401)em='API 키 오류 — 설정에서 키를 확인해주세요';
+      else if(res.status===429)em='API 요청 한도 초과 — 잠시 후 다시 시도해주세요';
+      else if(res.status===413)em='이미지 크기 초과 — 사진 없이 시도해보세요';
+      throw new Error(em);}
+    var rd=res.body.getReader(),dc=new TextDecoder(),full='';var sb=g('sb');
+    while(true){var r2=await rd.read();if(r2.done)break;var lns=dc.decode(r2.value).split('\n').filter(function(l){return l.indexOf('data: ')===0;});
+      for(var i=0;i<lns.length;i++){var dt=lns[i].slice(6);if(dt==='[DONE]')continue;try{var p=JSON.parse(dt);if(p.type==='content_block_delta'&&p.delta&&p.delta.text){full+=p.delta.text;sb.textContent=full;sb.scrollTop=sb.scrollHeight;}}catch(e){}}}
+    var parsed=null;try{var jm=full.match(/\{[\s\S]*\}/);if(jm)parsed=JSON.parse(jm[0]);}catch(e){}
+    if(!parsed)parsed=recover(full,g('ti').value.trim());
+    resultData=parsed;
+    show(parsed,naverData);
+  }catch(e){g('load').className='load';eb.textContent=e.message;eb.className='err on';g('gb').disabled=false;g('empty').style.display='';}
+}
+
+function nl(s){return (s||'').replace(/\\n/g,'\n');}
+function recover(raw,ft){
+  function pk(k){var re=new RegExp('"'+k+'"\\s*:\\s*"((?:[^"\\\\]|\\\\.)*)"');var m=raw.match(re);return m?m[1]:'';}
+  function pa(k){var re=new RegExp('"'+k+'"\\s*:\\s*\\[([\\s\\S]*?)\\]');var m=raw.match(re);if(!m)return[];var it=m[1].match(/"((?:[^"\\]|\\.)*)"/g);return it?it.map(function(s){return s.replace(/^"|"$/g,'');}):[];}
+  var o={title_1:pk('title_1')||ft,title_2:pk('title_2'),title_3:pk('title_3'),title_4:pk('title_4'),title_5:pk('title_5'),
+    keyword_main:pk('keyword_main')||'-',keyword_sub:pk('keyword_sub')||'-',keyword_location:pk('keyword_location')||'-',keyword_intent:pk('keyword_intent')||'-',
+    place_name:pk('place_name'),place_address:pk('place_address'),place_hours:pk('place_hours'),place_price:pk('place_price'),
+    body:pk('body'),hashtags:pa('hashtags'),reel:pk('reel'),
+    thumbnail_1:pk('thumbnail_1'),thumbnail_2:pk('thumbnail_2'),thumbnail_3:pk('thumbnail_3'),thumbnail_4:pk('thumbnail_4'),thumbnail_5:pk('thumbnail_5')};
+  if(!o.body){var cl=raw.replace(/^[\s\S]*?"body"\s*:\s*"/,'').replace(/",\s*"hashtags"[\s\S]*$/,'');o.body=cl||raw;}return o;
+}
+
+function show(d,naver){
+  g('load').className='load';
+  /* SEO 제목 5개 */
+  var tcs=g('tcs');tcs.innerHTML='';
+  [d.title_1,d.title_2,d.title_3,d.title_4,d.title_5].forEach(function(ti,ix){
+    if(!ti)return;var c=document.createElement('div');c.className='tc';
+    var n=document.createElement('div');n.className='tc-n';n.textContent=(ix+1);
+    var x=document.createElement('div');x.className='tc-x';x.textContent=ti;
+    var b=document.createElement('button');b.className='tc-c';b.textContent='복사';
+    (function(t2,b2){b2.onclick=function(){cpTxt(t2);b2.textContent='✅';b2.classList.add('ok');setTimeout(function(){b2.textContent='복사';b2.classList.remove('ok');},2000);};})(ti,b);
+    c.appendChild(n);c.appendChild(x);c.appendChild(b);tcs.appendChild(c);});
+  g('rb1').className='rb on';
+
+  /* 키워드 분석 */
+  var kg=g('kg');kg.innerHTML='';
+  [['메인 키워드',d.keyword_main],['서브 키워드',d.keyword_sub],['지역 키워드',d.keyword_location],['검색 의도',d.keyword_intent]].forEach(function(p){
+    var c=document.createElement('div');c.className='kc';var l=document.createElement('div');l.className='kl';l.textContent=p[0];
+    var v=document.createElement('div');v.className='kv';v.textContent=p[1]||'-';c.appendChild(l);c.appendChild(v);kg.appendChild(c);});
+  g('rb2').className='rb on';
+
+  /* 위치 정보 + 네이버 지도 */
+  var pn=d.place_name||'', pa2=d.place_address||'', ph=d.place_hours||'', pp=d.place_price||'';
+  if(pn||pa2){
+    var piHtml='<div style="display:flex;flex-direction:column;gap:8px">';
+    if(pn) piHtml+='<div class="kc"><div class="kl">업체명</div><div class="kv" style="font-size:14px">'+pn+'</div></div>';
+    if(pa2) piHtml+='<div class="kc"><div class="kl">주소</div><div class="kv">'+pa2+'</div></div>';
+    if(ph) piHtml+='<div class="kc"><div class="kl">영업시간</div><div class="kv">'+ph+'</div></div>';
+    if(pp) piHtml+='<div class="kc"><div class="kl">가격대</div><div class="kv">'+pp+'</div></div>';
+    piHtml+='</div>';
+    g('placeInfo').innerHTML=piHtml;
+    var mapQuery=encodeURIComponent(pn+(pa2?' '+pa2:''));
+    var mapLink=g('naverMapLink');
+    mapLink.href='https://map.naver.com/v5/search/'+mapQuery;
+    mapLink.style.display='block';
+    g('rb6').className='rb on';
+  }
+
+  /* 본문 */
+  var bs=nl(d.body||'');g('btxt').textContent=bs;
+  var charWithSpace=bs.length;
+  var charNoSpace=bs.replace(/\s/g,'').length;
+  var targetMap={short:800,normal:1500,long:1800};
+  var minTarget=targetMap[sV]||1500;
+  var charInfo=charNoSpace.toLocaleString()+'자 (공백 포함 '+charWithSpace.toLocaleString()+'자)';
+  if(charWithSpace<minTarget){charInfo+=' ⚠️ 목표 '+minTarget+'자 미달!';}
+  g('cc').textContent=charInfo;
+  g('rb3').className='rb on';
+
+  /* 해시태그 */
+  var tw=g('tw');tw.innerHTML='';var ht=d.hashtags||[];
+  if(!ht.length){var mm=(d.body||'').match(/#[가-힣a-zA-Z0-9_]+/g);if(mm)ht=mm.slice(0,15);}
+  ht.forEach(function(t){var s=document.createElement('span');s.className='tag';s.textContent=t;s.onclick=function(){cpTxt(t);};tw.appendChild(s);});
+  g('rb4').className='rb on';
+
+  /* 릴스 + 썸네일 5개 */
+  g('rt').textContent=nl(d.reel||'');
+
+  var thumbGrid=g('thumbGrid');thumbGrid.innerHTML='';
+  [d.thumbnail_1,d.thumbnail_2,d.thumbnail_3,d.thumbnail_4,d.thumbnail_5].forEach(function(th,ix){
+    if(!th)return;
+    var item=document.createElement('div');item.className='thumb-item';
+    var n=document.createElement('div');n.className='tc-n';n.textContent=(ix+1);
+    var x=document.createElement('div');x.className='tc-x';x.textContent=th;
+    var b=document.createElement('button');b.className='tc-c';b.textContent='복사';
+    (function(t2,b2){b2.onclick=function(){cpTxt(t2);b2.textContent='✅';b2.classList.add('ok');setTimeout(function(){b2.textContent='복사';b2.classList.remove('ok');},2000);};})(th,b);
+    item.appendChild(n);item.appendChild(x);item.appendChild(b);thumbGrid.appendChild(item);
+  });
+  g('rb5').className='rb on';
+  renderThumbImages();
+  g('gb').disabled=false;
+  g('rightResult').scrollTop=0;
+  if(imgs.length>0) g('tabPreview').style.color='#2d6a4f';
+}
+
+/* ── 사진 미리보기 ── */
+function renderPreview(){
+  var area=g('previewArea');
+  if(!resultData){
+    area.innerHTML='<div class="preview-no"><div class="preview-no-ico">👀</div><div class="preview-no-txt">포스팅을 먼저 생성하면<br>사진이 합쳐진 미리보기를 볼 수 있어요</div></div>';
+    return;
+  }
+  var d=resultData;
+  var title=d.title_1||g('ti').value||'제목 없음';
+  var bodyRaw=nl(d.body||'');
+  var tags=(d.hashtags||[]).join(' ');
+  var parts=bodyRaw.split(/(\[사진\d*\])/g);
+  var imgIdx=0;
+  var bodyHtml='';
+  parts.forEach(function(part){
+    var m=part.match(/\[사진(\d*)\]/);
+    if(m){
+      var idx=m[1]?parseInt(m[1])-1:imgIdx;
+      if(imgs[idx]){
+        bodyHtml+='<div class="pp-img"><img src="'+imgs[idx]+'" alt="사진'+(idx+1)+'"></div>';
+      } else {
+        bodyHtml+='<div class="pp-img-empty"><div class="pp-img-empty-ico">📸</div><div class="pp-img-empty-txt">사진'+(idx+1)+' — 왼쪽에서 사진을 업로드하세요</div></div>';
+      }
+      imgIdx++;
+    } else {
+      var escaped=part.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      bodyHtml+='<p>'+escaped+'</p>';
+    }
+  });
+  if(imgIdx===0&&imgs.length>0){
+    bodyHtml+='<div style="margin-top:20px">';
+    imgs.forEach(function(src,i){
+      bodyHtml+='<div class="pp-img"><img src="'+src+'" alt="사진'+(i+1)+'"></div>';
+    });
+    bodyHtml+='</div>';
+  }
+  var tagsHtml='';
+  if(tags){
+    tagsHtml='<div class="preview-post-tags">';
+    tags.split(/\s+/).forEach(function(t){if(t.startsWith('#'))tagsHtml+='<span>'+t+'</span> ';});
+    tagsHtml+='</div>';
+  }
+  area.innerHTML='<div class="preview-wrap"><div class="preview-post">'
+    +'<div class="preview-post-title">'+title.replace(/</g,'&lt;')+'</div>'
+    +'<div class="preview-post-body">'+bodyHtml+'</div>'
+    +tagsHtml
+    +'</div></div>';
+}
+
+/* ── 복사 ── */
+function cpTxt(t){if(navigator.clipboard)navigator.clipboard.writeText(t).catch(function(){fb(t);});else fb(t);}
+function fb(t){var a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');document.body.removeChild(a);}
+function cpId(id,b){var o=b.textContent;cpTxt(g(id).textContent);b.textContent='✅ 복사됨!';b.classList.add('ok');setTimeout(function(){b.textContent=o;b.classList.remove('ok');},2000);}
+function cpTags(b){var t=Array.from(document.querySelectorAll('.tag')).map(function(x){return x.textContent;}).join(' ');var o=b.textContent;cpTxt(t);b.textContent='✅ 복사됨!';b.classList.add('ok');setTimeout(function(){b.textContent=o;b.classList.remove('ok');},2000);}
+function cpThumbs(b){
+  var thumbs=[];
+  [resultData.thumbnail_1,resultData.thumbnail_2,resultData.thumbnail_3,resultData.thumbnail_4,resultData.thumbnail_5].forEach(function(t,i){if(t)thumbs.push((i+1)+'. '+t);});
+  cpTxt(thumbs.join('\n'));
+  var o=b.textContent;b.textContent='✅ 복사됨!';b.classList.add('ok');setTimeout(function(){b.textContent=o;b.classList.remove('ok');},2000);
+}
+function cpAll(){
+  var ti=[resultData.title_1,resultData.title_2,resultData.title_3,resultData.title_4,resultData.title_5].filter(Boolean).map(function(t,i){return(i+1)+'. '+t;}).join('\n');
+  var thumbs=[resultData.thumbnail_1,resultData.thumbnail_2,resultData.thumbnail_3,resultData.thumbnail_4,resultData.thumbnail_5].filter(Boolean).map(function(t,i){return(i+1)+'. '+t;}).join('\n');
+  cpTxt('[제목]\n'+ti+'\n\n[본문]\n'+g('btxt').textContent+'\n\n[해시태그]\n'+Array.from(document.querySelectorAll('.tag')).map(function(x){return x.textContent;}).join(' ')+'\n\n[릴스]\n'+g('rt').textContent+'\n\n[썸네일 문구]\n'+thumbs);
+  alert('전체 복사 완료!');
+}
+
+/* ── 썸네일 이미지 생성 ── */
+var thumbStyleCur='dark';
+var thumbStyles={
+  dark:{bg:'#1a1a1a',text:'#ffffff',sub:'#aaaaaa',accent:'#2d6a4f'},
+  light:{bg:'#ffffff',text:'#1a1a1a',sub:'#666666',accent:'#2d6a4f'},
+  green:{bg:'#2d6a4f',text:'#ffffff',sub:'#a7d5c4',accent:'#ffffff'},
+  warm:{bg:'#f5e6d3',text:'#3d2b1f',sub:'#8b6f47',accent:'#c75b39'},
+  photo:{bg:'photo',text:'#ffffff',sub:'#dddddd',accent:'#ffffff'}
+};
+function setThumbStyle(btn,style){
+  document.querySelectorAll('.thumb-style-btn').forEach(function(b){b.classList.remove('on');});
+  btn.classList.add('on');thumbStyleCur=style;
+  if(resultData) renderThumbImages();
+}
+function renderThumbImages(){
+  var grid=g('thumbImgGrid');grid.innerHTML='';
+  var thumbs=[resultData.thumbnail_1,resultData.thumbnail_2,resultData.thumbnail_3,resultData.thumbnail_4,resultData.thumbnail_5].filter(Boolean);
+  if(thumbs.length===0){g('thumbDlAll').style.display='none';return;}
+  var loaded=0;
+  thumbs.forEach(function(txt,ix){
+    var wrap=document.createElement('div');wrap.className='thumb-img-wrap';
+    var cv=document.createElement('canvas');cv.width=1280;cv.height=720;
+    wrap.appendChild(cv);
+    var dl=document.createElement('button');dl.className='thumb-dl';dl.textContent='💾 저장';
+    (function(c,i){dl.onclick=function(e){e.stopPropagation();downloadThumb(c,'thumbnail_'+(i+1)+'.png');};
+      wrap.onclick=function(){downloadThumb(c,'thumbnail_'+(i+1)+'.png');};})(cv,ix);
+    wrap.appendChild(dl);
+    grid.appendChild(wrap);
+    drawThumb(cv,txt,ix,function(){loaded++;});
+  });
+  g('thumbDlAll').style.display='block';
+}
+function drawThumb(cv,text,idx,cb){
+  var ctx=cv.getContext('2d');var W=cv.width,H=cv.height;
+  var st=thumbStyles[thumbStyleCur]||thumbStyles.dark;
+
+  function afterBg(){
+    /* 상단 브랜드 */
+    ctx.fillStyle=st.sub;ctx.font='600 28px "Pretendard","Apple SD Gothic Neo","Noto Sans KR",sans-serif';
+    ctx.textAlign='center';ctx.fillText('잰잇 JAEINIT',W/2,60);
+    /* 구분선 */
+    ctx.strokeStyle=st.accent||st.text;ctx.lineWidth=3;ctx.globalAlpha=0.4;
+    ctx.beginPath();ctx.moveTo(W/2-80,80);ctx.lineTo(W/2+80,80);ctx.stroke();
+    ctx.globalAlpha=1;
+    /* 메인 텍스트 - 자동 줄바꿈 */
+    ctx.fillStyle=st.text;ctx.textAlign='center';
+    var fontSize=text.length>20?52:text.length>12?62:72;
+    ctx.font='800 '+fontSize+'px "Pretendard","Apple SD Gothic Neo","Noto Sans KR",sans-serif';
+    var lines=[];var line='';var maxW=W-160;
+    for(var i=0;i<text.length;i++){
+      var test=line+text[i];if(ctx.measureText(test).width>maxW&&line){lines.push(line);line=text[i];}else{line=test;}
+    }
+    if(line)lines.push(line);
+    if(lines.length>3)lines=lines.slice(0,3);
+    var lineH=fontSize*1.35;var startY=H/2-(lines.length-1)*lineH/2;
+    ctx.shadowColor='rgba(0,0,0,0.3)';ctx.shadowBlur=12;ctx.shadowOffsetY=4;
+    lines.forEach(function(l,li){ctx.fillText(l,W/2,startY+li*lineH);});
+    ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
+    /* 하단 번호 뱃지 */
+    var badgeY=H-50;
+    ctx.fillStyle=st.accent||'#2d6a4f';ctx.globalAlpha=0.8;
+    roundRect(ctx,W/2-30,badgeY-18,60,28,14);ctx.fill();
+    ctx.globalAlpha=1;
+    ctx.fillStyle=(st.bg==='photo'||st.bg==='#1a1a1a'||st.bg==='#2d6a4f')?'#ffffff':'#1a1a1a';
+    ctx.font='700 16px "Pretendard","Apple SD Gothic Neo",sans-serif';
+    ctx.fillText((idx+1)+'/5',W/2,badgeY+2);
+    if(cb)cb();
+  }
+
+  if(st.bg==='photo'&&imgs.length>0){
+    var img=new Image();img.onload=function(){
+      ctx.drawImage(img,0,0,W,H);
+      ctx.fillStyle='rgba(0,0,0,0.55)';ctx.fillRect(0,0,W,H);
+      afterBg();
+    };img.onerror=function(){ctx.fillStyle='#1a1a1a';ctx.fillRect(0,0,W,H);afterBg();};
+    img.src=imgs[idx%imgs.length];
+  } else {
+    ctx.fillStyle=st.bg;ctx.fillRect(0,0,W,H);
+    ctx.fillStyle=st.accent||'#2d6a4f';ctx.globalAlpha=0.12;
+    ctx.beginPath();ctx.arc(W*0.85,H*0.2,180,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.arc(W*0.15,H*0.8,120,0,Math.PI*2);ctx.fill();
+    ctx.globalAlpha=1;
+    afterBg();
+  }
+}
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);
+  ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();
+}
+function downloadThumb(cv,name){
+  var a=document.createElement('a');a.download=name;a.href=cv.toDataURL('image/png');a.click();
+}
+function downloadAllThumbs(){
+  var canvases=document.querySelectorAll('#thumbImgGrid canvas');
+  canvases.forEach(function(cv,i){
+    setTimeout(function(){downloadThumb(cv,'thumbnail_'+(i+1)+'.png');},i*300);
+  });
+}
+
+function reset(){
+  ['ti','mi','ci','ii','f_region','f_date','f_price','f_url','f_good','f_bad','f_reason',
+   'f_menu','f_recommend','f_waiting','f_parking','f_vibe','f_revisit',
+   'f_country','f_schedule','f_hotel','f_transport','f_budget','f_tips',
+   'f_benefit','f_feel','f_design','f_as','f_compare','f_priceRange',
+   'f_product','f_techPrice','f_vsProduct','f_usePeriod','f_satisfaction','f_forWho','f_pros','f_cons'
+  ].forEach(function(id){var el=g(id);if(el)el.value='';});
+  g('pg').innerHTML='';g('pcnt').textContent='';g('cnote').className='cn';
+  g('thumbImgGrid').innerHTML='';g('thumbDlAll').style.display='none';
+  document.querySelectorAll('.tb').forEach(function(b){b.classList.remove('on');});
+  document.querySelectorAll('.vb').forEach(function(b){b.classList.remove('on');});
+  /* 기본 분량 다시 선택 */
+  var vbs=document.querySelectorAll('.vb');if(vbs[1])vbs[1].classList.add('on');
+  sT='';sV='normal';imgs=[];resultData=null;
+  ['rb1','rb2','rb3','rb4','rb5','rb6'].forEach(function(id){g(id).className='rb';});
+  ['fields_food','fields_travel','fields_shopping','fields_tech'].forEach(function(id){g(id).classList.remove('on');});
+  g('load').className='load';g('eb').className='err';g('gb').disabled=false;g('empty').style.display='';
+  g('rightResult').scrollTop=0;switchTab('result');
+}
+
+/* ── 글 저장/불러오기/삭제 ── */
+function getSavedPosts(){
+  try{return JSON.parse(localStorage.getItem('jaeinit_saved_posts')||'[]');}
+  catch(e){return [];}
+}
+function updateSavedCount(){
+  var cnt=getSavedPosts().length;
+  g('savedCount').textContent=cnt>0?cnt:'';
+}
+function savePost(){
+  if(!resultData){alert('저장할 글이 없어요!');return;}
+  var posts=getSavedPosts();
+  var title=resultData.title_1||g('ti').value||'제목 없음';
+  var post={
+    id:Date.now(),
+    title:title,
+    type:sT,
+    date:new Date().toLocaleString('ko-KR'),
+    data:resultData
+  };
+  posts.unshift(post);
+  localStorage.setItem('jaeinit_saved_posts',JSON.stringify(posts));
+  updateSavedCount();
+  var btn=g('saveBtn');
+  btn.textContent='✅ 저장됨!';btn.style.background='#388e3c';btn.style.color='#fff';btn.style.borderColor='#388e3c';
+  setTimeout(function(){btn.textContent='💾 저장';btn.style.background='';btn.style.color='';btn.style.borderColor='';},2000);
+}
+
+function renderSavedList(){
+  var posts=getSavedPosts();
+  var list=g('savedList');
+  var empty=g('savedEmpty');
+  list.innerHTML='';
+  if(posts.length===0){empty.style.display='block';return;}
+  empty.style.display='none';
+
+  var clearAll=document.createElement('div');
+  clearAll.style.cssText='text-align:right;margin-bottom:12px';
+  var clearBtn=document.createElement('button');
+  clearBtn.style.cssText='background:none;border:1px solid #ffcdd2;color:#dc3545;border-radius:7px;padding:6px 12px;font-family:inherit;font-size:11px;cursor:pointer';
+  clearBtn.textContent='전체 삭제';
+  clearBtn.onclick=function(){
+    if(!confirm('저장된 글 '+posts.length+'개를 모두 삭제할까요?')) return;
+    localStorage.removeItem('jaeinit_saved_posts');
+    updateSavedCount();renderSavedList();
+  };
+  clearAll.appendChild(clearBtn);
+  list.appendChild(clearAll);
+
+  posts.forEach(function(post){
+    var card=document.createElement('div');
+    card.style.cssText='background:#fff;border:1px solid #e4e1dc;border-radius:12px;padding:16px;margin-bottom:10px;';
+    var header=document.createElement('div');
+    header.style.cssText='display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px';
+    var titleDiv=document.createElement('div');
+    titleDiv.style.cssText='flex:1';
+    var h=document.createElement('div');
+    h.style.cssText='font-size:14px;font-weight:700;color:#1a1a1a;line-height:1.5;margin-bottom:4px';
+    h.textContent=post.title;
+    var meta=document.createElement('div');
+    meta.style.cssText='font-size:11px;color:#888';
+    meta.textContent=post.date+(post.type?' · '+post.type:'');
+    titleDiv.appendChild(h);titleDiv.appendChild(meta);
+    header.appendChild(titleDiv);
+    card.appendChild(header);
+
+    var bodyPrev=document.createElement('div');
+    var bodyStr=(post.data.body||'').replace(/\\n/g,'\n');
+    bodyPrev.style.cssText='font-size:12px;line-height:1.7;color:#555;max-height:60px;overflow:hidden;margin-bottom:12px;white-space:pre-line';
+    bodyPrev.textContent=bodyStr.substring(0,150)+'...';
+    card.appendChild(bodyPrev);
+
+    if(post.data.hashtags&&post.data.hashtags.length>0){
+      var tagRow=document.createElement('div');
+      tagRow.style.cssText='display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px';
+      post.data.hashtags.slice(0,5).forEach(function(t){
+        var tag=document.createElement('span');
+        tag.style.cssText='background:#e8f5ee;color:#1b4332;border-radius:99px;padding:2px 8px;font-size:10px';
+        tag.textContent=t;
+        tagRow.appendChild(tag);
+      });
+      if(post.data.hashtags.length>5){
+        var more=document.createElement('span');
+        more.style.cssText='font-size:10px;color:#888;padding:2px 4px';
+        more.textContent='+'+(post.data.hashtags.length-5)+'개';
+        tagRow.appendChild(more);
+      }
+      card.appendChild(tagRow);
+    }
+
+    var btns=document.createElement('div');
+    btns.style.cssText='display:flex;gap:6px';
+
+    var loadBtn=document.createElement('button');
+    loadBtn.style.cssText='flex:1;padding:9px;background:#2d6a4f;color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer';
+    loadBtn.textContent='불러오기';
+    (function(p){loadBtn.onclick=function(){
+      resultData=p.data;
+      show(p.data,null);
+      switchTab('result');
+    };})(post);
+
+    var cpBtn=document.createElement('button');
+    cpBtn.style.cssText='flex:1;padding:9px;background:#fff;color:#2d6a4f;border:1.5px solid #2d6a4f;border-radius:8px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer';
+    cpBtn.textContent='복사';
+    (function(p){cpBtn.onclick=function(){
+      var txt='[제목]\n'+p.title+'\n\n[본문]\n'+(p.data.body||'').replace(/\\n/g,'\n')+'\n\n[해시태그]\n'+(p.data.hashtags||[]).join(' ');
+      cpTxt(txt);
+      cpBtn.textContent='✅ 복사됨';setTimeout(function(){cpBtn.textContent='복사';},2000);
+    };})(post);
+
+    var delBtn=document.createElement('button');
+    delBtn.style.cssText='padding:9px 12px;background:#fff;color:#dc3545;border:1.5px solid #ffcdd2;border-radius:8px;font-family:inherit;font-size:12px;cursor:pointer';
+    delBtn.textContent='삭제';
+    (function(pid){delBtn.onclick=function(){
+      if(!confirm('이 글을 삭제할까요?')) return;
+      var pp=getSavedPosts().filter(function(x){return x.id!==pid;});
+      localStorage.setItem('jaeinit_saved_posts',JSON.stringify(pp));
+      updateSavedCount();renderSavedList();
+    };})(post.id);
+
+    btns.appendChild(loadBtn);btns.appendChild(cpBtn);btns.appendChild(delBtn);
+    card.appendChild(btns);
+    list.appendChild(card);
+  });
+}
+
+/* ── 저장된 글 내보내기/가져오기 ── */
+function exportPosts(){
+  var posts=getSavedPosts();
+  if(posts.length===0){alert('내보낼 글이 없어요!');return;}
+  var data={app:'jaeinit_blog_studio',version:4,exported:new Date().toISOString(),posts:posts};
+  var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  var d=new Date();
+  a.download='jaeinit_posts_'+d.getFullYear()+(d.getMonth()+101+'').slice(1)+(d.getDate()+100+'').slice(1)+'.json';
+  a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href);},1000);
+}
+function importPosts(e){
+  var f=e.target.files[0];
+  if(!f)return;
+  var r=new FileReader();
+  r.onload=function(ev){
+    try{
+      var data=JSON.parse(ev.target.result);
+      var incoming=data.posts||((Array.isArray(data))?data:null);
+      if(!incoming||!Array.isArray(incoming)){alert('잰잇 블로그 스튜디오 백업 파일이 아니에요!');return;}
+      var cur=getSavedPosts();
+      var curIds={};cur.forEach(function(p){curIds[p.id]=true;});
+      var added=0,skipped=0;
+      incoming.forEach(function(p){
+        if(!p||!p.id||!p.data){skipped++;return;}
+        if(curIds[p.id]){skipped++;return;}
+        cur.push(p);curIds[p.id]=true;added++;
+      });
+      cur.sort(function(a,b){return b.id-a.id;});
+      localStorage.setItem('jaeinit_saved_posts',JSON.stringify(cur));
+      updateSavedCount();renderSavedList();
+      alert('가져오기 완료! 새로 추가 '+added+'개'+(skipped>0?', 중복/건너뜀 '+skipped+'개':''));
+    }catch(err){alert('파일을 읽을 수 없어요. 내보내기로 만든 .json 파일인지 확인해주세요.');}
+  };
+  r.readAsText(f);
+  e.target.value='';
+}
+
+loadKeys();
+updateSavedCount();
+</script>
+</body>
+</html>
