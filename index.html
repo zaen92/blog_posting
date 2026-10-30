@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>잰잇 블로그 스튜디오 v12</title>
+<title>잰잇 블로그 스튜디오 v10</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;900&display=swap');
@@ -2421,28 +2421,39 @@ function tplLayers(tid,bgSrc,img2,img3,mainT,lblT){
       t5b.bxBg='solid';t5b.bxC1='#3b6cff';t5b.bxA=1;t5b.bxPt=.5;t5b.bxPb=.5;t5b.bxPl=6;t5b.bxPr=6;t5b.bxRad=.3;Ls.push(t5b);}
     else if(ti===6){
       Ls.push(IMG({role:'bgc',name:'배경(다크)',x:.5,y:.5,w:1,h:1,color:'#17191c',locked:true}));
-      Ls.push(IMG({role:'photo',name:'상단 사진',x:.5,y:.25,w:1,h:.5,src:bgSrc,color:'#3a3d42',scale:1,ox:0,oy:0,bright:.8}));
-      Ls.push(T({role:'label',name:'카테고리',x:.5,y:.05,text:lblT||'카테고리',fs:.018,color:'#cccccc',align:'left',chip:'none',weight:500}));
-      Ls.push(T({role:'main',name:'제목',x:.5,y:.12,text:mainT,fs:.034,color:'#ffffff',align:'left',shadow:true,chip:'none',lineH:1.5}));
-      Ls.push(T({role:'sub',name:'계정명',x:.5,y:.3,text:'계정명 · 이번 주',fs:.018,color:'#dddddd',align:'left',chip:'none',weight:500}));
-      Ls.push(IMG({role:'deco',name:'하단 흰 카드',x:.5,y:.78,w:1,h:.45,color:'#ffffff'}));
-      Ls.push(T({role:'body',name:'중요 내용',x:.5,y:.62,text:'중요한 내용을 입력하세요 중요한 내용을\n입력하세요 중요한 내용을 입력하세요',fs:.022,color:'#111111',align:'left',chip:'none',weight:700,lineH:1.6}));
-      Ls.push(T({role:'body2',name:'본문',x:.5,y:.8,text:'중요한 내용을 입력하세요 중요한 내용을 입력하세요\n중요한 내용을 입력하세요 중요한 내용을 입력하세요\n중요한 내용을 입력하세요 중요한 내용을 입력하세요\n중요한 내용을 입력하세요',fs:.019,color:'#888888',align:'left',chip:'none',weight:400,lineH:1.8}));}
+      Ls.push(IMG({role:'photo',name:'상단 사진',x:.5,y:.215,w:1,h:.43,src:bgSrc,color:'#3a3d42',scale:1,ox:0,oy:0,bright:.85}));
+      Ls.push(GR({role:'dim',name:'상단 어둡게',x:.5,y:.1,color:'#000000',h:.5,a:.4}));
+      Ls.push(T({role:'label',name:'카테고리',x:.5,y:.13,text:lblT||'카테고리',fs:.018,color:'#cccccc',align:'left',shadow:true,chip:'none',weight:500}));
+      Ls.push(T({role:'main',name:'제목',x:.5,y:.225,text:mainT,fs:.042,color:'#ffffff',align:'left',shadow:true,chip:'none',lineH:1.45}));
+      Ls.push(IMG({role:'photo3',name:'프로필 사진(원형)',x:.09,y:.33,w:.07,h:.056,src:img3,color:'#d9d6d0',scale:1,ox:0,oy:0,rad:.5}));
+      Ls.push(T({role:'sub',name:'계정명',x:.24,y:.33,text:'계정명 · 0분 전',fs:.018,color:'#dddddd',align:'left',shadow:true,chip:'none',weight:500}));
+      var t6s=T({role:'cta',name:'통계 버튼',x:.85,y:.33,text:'통계',fs:.02,color:'#ffffff',chip:'none',weight:500});
+      t6s.bd={sides:{t:{w:.06,c:'#ffffff'},r:{w:.06,c:'#ffffff'},b:{w:.06,c:'#ffffff'},l:{w:.06,c:'#ffffff'}},style:'solid'};
+      t6s.bxPt=.4;t6s.bxPb=.4;t6s.bxPl=1;t6s.bxPr=1;Ls.push(t6s);
+      Ls.push(IMG({role:'deco',name:'하단 흰 카드',x:.5,y:.715,w:1,h:.57,color:'#ffffff'}));
+      Ls.push(T({role:'body',name:'중요 내용',x:.5,y:.53,text:'중요한 내용을 입력하세요 중요한 내용을 입력하세요\n중요한 내용을 입력하세요',fs:.024,color:'#111111',align:'left',chip:'none',weight:700,lineH:1.6}));
+      Ls.push(T({role:'body2',name:'본문',x:.5,y:.7,text:'중요한 내용을 입력하세요 중요한 내용을 입력하세요 중요한\n내용을 입력하세요 중요한 내용을 입력하세요 중요한 내용을\n입력하세요 중요한 내용을 입력하세요 중요한 내용을 입력하\n세요 중요한 내용을 입력하세요',fs:.021,color:'#888888',align:'left',chip:'none',weight:400,lineH:1.85}));}
     else if(ti===7){
       Ls.push(IMG({role:'bgc',name:'배경(흰색)',x:.5,y:.5,w:1,h:1,color:'#ffffff',locked:true}));
-      Ls.push(T({role:'label',name:'카테고리',x:.5,y:.06,text:lblT||'카테고리',fs:.018,color:'#999999',align:'left',chip:'none',weight:500}));
-      Ls.push(T({role:'main',name:'제목',x:.5,y:.12,text:mainT,fs:.03,color:'#111111',align:'left',chip:'none'}));
-      Ls.push(T({role:'sub',name:'계정명',x:.5,y:.21,text:'이름 · 아이디',fs:.018,color:'#aaaaaa',align:'left',chip:'none',weight:500}));
-      Ls.push(IMG({role:'photo',name:'사진',x:.5,y:.46,w:.76,h:.32,src:bgSrc,color:'#d9d6d0',scale:1,ox:0,oy:0}));
-      Ls.push(T({role:'body',name:'본문',x:.5,y:.78,text:'내용을 입력하세요 내용을 입력하세요 내용을 입력하세요\n내용을 입력하세요 내용을 입력하세요 내용을 입력하세요\n내용을 입력하세요',fs:.019,color:'#888888',chip:'none',weight:400,lineH:1.8}));}
+      Ls.push(T({role:'label',name:'카테고리',x:.5,y:.13,text:lblT||'카테고리',fs:.018,color:'#999999',align:'left',chip:'none',weight:500}));
+      Ls.push(T({role:'main',name:'제목',x:.5,y:.185,text:mainT,fs:.032,color:'#111111',align:'left',chip:'none'}));
+      Ls.push(IMG({role:'photo3',name:'프로필 사진(원형)',x:.11,y:.27,w:.07,h:.056,src:img3,color:'#d9d6d0',scale:1,ox:0,oy:0,rad:.5}));
+      Ls.push(T({role:'sub',name:'계정명',x:.26,y:.27,text:'이름 · 0분 전',fs:.018,color:'#aaaaaa',align:'left',chip:'none',weight:500}));
+      var t7s=T({role:'cta',name:'통계 버튼',x:.85,y:.27,text:'통계',fs:.019,color:'#555555',chip:'none',weight:500});
+      t7s.bd={sides:{t:{w:.05,c:'#cccccc'},r:{w:.05,c:'#cccccc'},b:{w:.05,c:'#cccccc'},l:{w:.05,c:'#cccccc'}},style:'solid'};
+      t7s.bxPt=.4;t7s.bxPb=.4;t7s.bxPl=1;t7s.bxPr=1;t7s.bxRad=.2;Ls.push(t7s);
+      Ls.push(IMG({role:'photo',name:'사진',x:.5,y:.55,w:.84,h:.33,src:bgSrc,color:'#d9d6d0',scale:1,ox:0,oy:0}));
+      Ls.push(T({role:'body',name:'본문',x:.5,y:.84,text:'내용을 입력하세요 내용을 입력하세요 내용을 입력하세요\n내용을 입력하세요 내용을 입력하세요 내용을 입력하세요\n내용을 입력하세요',fs:.021,color:'#888888',chip:'none',weight:400,lineH:1.8}));}
     else if(ti===8){PBG2();DIM2(.8,.8,.55);
-      Ls.push(T({role:'label',name:'캡션',x:.45,y:.6,text:lblT||'캡션을 입력하세요',fs:.022,color:'#eeeeee',shadow:true,align:'left',chip:'none',weight:500}));
-      Ls.push(T({role:'main',name:'메인 제목',x:.6,y:.75,text:mainT,fs:.046,color:'#ffffff',shadow:true,align:'left',chip:'none',lineH:1.5}));}
+      Ls.push(T({role:'label',name:'캡션',x:.72,y:.615,text:lblT||'캡션을 입력하세요',fs:.022,color:'#eeeeee',shadow:true,align:'right',chip:'none',weight:500}));
+      Ls.push(IMG({role:'deco',name:'가는 라인',x:.73,y:.645,w:.47,h:.002,color:'#ffffff',opacity:.8}));
+      Ls.push(T({role:'main',name:'메인 제목',x:.72,y:.76,text:mainT,fs:.05,color:'#ffffff',shadow:true,align:'right',chip:'none',lineH:1.45}));}
     else if(ti===9){PBG2();DIM2(.8,.8,.55);
-      var t9c=T({role:'label',name:'캡션 박스',x:.6,y:.58,text:lblT||'캡션을 입력하세요',fs:.02,color:'#ffffff',chip:'none',weight:500});
-      t9c.bxBg='solid';t9c.bxC1='#000000';t9c.bxA=.35;t9c.bxPt=.4;t9c.bxPb=.4;t9c.bxPl=.8;t9c.bxPr=.8;t9c.bxRad=.1;Ls.push(t9c);
-      Ls.push(T({role:'main',name:'메인 제목',x:.6,y:.72,text:mainT,fs:.045,color:'#ffffff',shadow:true,align:'right',chip:'none',lineH:1.5}));
-      Ls.push(T({role:'sub',name:'한 줄 설명',x:.63,y:.85,text:'한 줄 설명을 입력하세요',fs:.02,color:'#dddddd',align:'right',chip:'none',weight:400}));}
+      var t9c=T({role:'label',name:'캡션 박스',x:.72,y:.56,text:lblT||'캡션을 입력하세요',fs:.02,color:'#ffffff',chip:'none',weight:500});
+      t9c.bd={sides:{t:{w:.06,c:'#ffffff'},r:{w:.06,c:'#ffffff'},b:{w:.06,c:'#ffffff'},l:{w:.06,c:'#ffffff'}},style:'solid'};
+      t9c.bxPt=.4;t9c.bxPb=.4;t9c.bxPl=.9;t9c.bxPr=.9;t9c.bxRad=.8;Ls.push(t9c);
+      Ls.push(T({role:'main',name:'메인 제목',x:.7,y:.7,text:mainT,fs:.05,color:'#ffffff',shadow:true,align:'right',chip:'none',lineH:1.45}));
+      Ls.push(T({role:'sub',name:'한 줄 설명',x:.72,y:.83,text:'한 줄 설명을 입력하세요',fs:.02,color:'#cccccc',align:'right',chip:'none',weight:400}));}
     else if(ti===10){PBG2(.85);
       Ls.push(T({role:'label',name:'캡션 칩',x:.15,y:.2,text:lblT||'캡션',fs:.03,color:'#ffffff',chip:'each',chipColor:'#ff5c8a',weight:800}));
       var pl10=mainT.split('\n');
@@ -2453,37 +2464,36 @@ function tplLayers(tid,bgSrc,img2,img3,mainT,lblT){
       var t10b=T({role:'sub',name:'세로 박스 2',x:.78,y:.4,text:v2,fs:.04,color:'#111111',chip:'none',weight:800,lineH:1.15});
       t10b.bxBg='solid';t10b.bxC1='#ffffff';t10b.bxA=1;t10b.bxPt=.5;t10b.bxPb=.5;t10b.bxPl=.5;t10b.bxPr=.5;Ls.push(t10b);}
     else if(ti===11){PBG2();DIM2(.8,.7,.5);
-      Ls.push(T({role:'label',name:'캡션',x:.3,y:.17,text:lblT||'캡션을 입력하세요',fs:.022,color:'#ffffff',shadow:true,align:'left',chip:'none',weight:500}));
-      Ls.push(IMG({role:'deco',name:'세로 라인',x:.17,y:.3,w:.004,h:.16,color:'#ffffff',opacity:.9}));
-      Ls.push(T({role:'main',name:'메인 제목',x:.5,y:.78,text:mainT,fs:.042,color:'#ffffff',shadow:true,align:'left',chip:'none',lineH:1.5}));}
-    else if(ti===12){PBG2();DIM2(.15,.8,.4);
-      var t12c=T({role:'label',name:'캡션 알약',x:.3,y:.12,text:lblT||'캡션을 입력하세요',fs:.02,color:'#ffffff',chip:'none',weight:600});
+      Ls.push(T({role:'label',name:'캡션',x:.32,y:.155,text:lblT||'캡션을 입력하세요',fs:.024,color:'#ffffff',shadow:true,align:'left',chip:'none',weight:500}));
+      Ls.push(IMG({role:'deco',name:'세로 라인',x:.095,y:.47,w:.004,h:.3,color:'#ffffff',opacity:.9}));
+      Ls.push(T({role:'main',name:'메인 제목',x:.5,y:.78,text:mainT,fs:.05,color:'#ffffff',shadow:true,align:'left',chip:'none',lineH:1.45}));}
+    else if(ti===12){PBG2();DIM2(.12,.7,.45);
+      var t12c=T({role:'label',name:'캡션 알약',x:.19,y:.115,text:lblT||'캡션을 입력하세요',fs:.02,color:'#ffffff',chip:'none',weight:600});
       t12c.bxBg='solid';t12c.bxC1='#2f6bff';t12c.bxA=1;t12c.bxPt=.45;t12c.bxPb=.45;t12c.bxPl=.9;t12c.bxPr=.9;t12c.bxRad=1.6;Ls.push(t12c);
-      Ls.push(T({role:'main',name:'메인 제목',x:.5,y:.22,text:mainT,fs:.045,color:'#ffffff',shadow:true,align:'left',chip:'none',lineH:1.5}));
-      Ls.push(IMG({role:'deco',name:'하단 라인',x:.5,y:.88,w:.86,h:.003,color:'#ffffff',opacity:.85}));}
+      Ls.push(T({role:'main',name:'메인 제목',x:.5,y:.21,text:mainT,fs:.05,color:'#ffffff',shadow:true,align:'left',chip:'none',lineH:1.45}));}
     else if(ti===13){PBG2();DIM2(.8,.8,.55);
       Ls.push(T({role:'label',name:'캡션',x:.5,y:.55,text:lblT||'캡션을 입력하세요',fs:.02,color:'#cccccc',align:'left',chip:'none',weight:500}));
       Ls.push(T({role:'main',name:'메인 제목',x:.5,y:.72,text:mainT,fs:.045,color:'#ffffff',align:'left',chip:'none',lineH:1.5}));
       Ls.push(IMG({role:'deco',name:'밑줄',x:.5,y:.885,w:.8,h:.003,color:'#ffffff',opacity:.9}));}
     else if(ti===14){PBG2();
-      var t14c=T({role:'label',name:'캡션 박스',x:.3,y:.62,text:lblT||'캡션을 입력하세요',fs:.024,color:'#ffffff',align:'left',chip:'none'});
+      var t14c=T({role:'label',name:'캡션 박스',x:.24,y:.655,text:lblT||'캡션을 입력하세요',fs:.022,color:'#ffffff',align:'left',chip:'none'});
       t14c.bxBg='solid';t14c.bxC1='#111111';t14c.bxA=1;t14c.bxPt=.4;t14c.bxPb=.4;t14c.bxPl=.7;t14c.bxPr=.7;Ls.push(t14c);
       var pl14=mainT.split('\n');
-      var t14a=T({role:'main',name:'제목 박스 1',x:.4,y:.71,text:pl14[0]||mainT,fs:.04,color:'#111111',align:'left',chip:'none'});
+      var t14a=T({role:'main',name:'제목 박스 1',x:.28,y:.725,text:pl14[0]||mainT,fs:.04,color:'#111111',align:'left',chip:'none'});
       t14a.bxBg='solid';t14a.bxC1='#ffffff';t14a.bxA=1;t14a.bxPt=.35;t14a.bxPb=.35;t14a.bxPl=.6;t14a.bxPr=.6;Ls.push(t14a);
       if(pl14[1]){
-        var t14b=T({role:'sub',name:'제목 박스 2',x:.6,y:.79,text:pl14[1],fs:.04,color:'#111111',align:'left',chip:'none'});
+        var t14b=T({role:'sub',name:'제목 박스 2',x:.62,y:.82,text:pl14[1],fs:.04,color:'#111111',align:'left',chip:'none'});
         t14b.bxBg='solid';t14b.bxC1='#ffffff';t14b.bxA=1;t14b.bxPt=.35;t14b.bxPb=.35;t14b.bxPl=.6;t14b.bxPr=.6;Ls.push(t14b);
       }}
     else if(ti===15){PBG2();DIM2(.8,.7,.5);
-      var t15c=T({role:'label',name:'캡션 알약',x:.3,y:.18,text:lblT||'캡션을 입력하세요',fs:.02,color:'#111111',chip:'none',weight:600});
+      var t15c=T({role:'label',name:'캡션 알약',x:.18,y:.115,text:lblT||'캡션을 입력하세요',fs:.02,color:'#111111',chip:'none',weight:600});
       t15c.bxBg='solid';t15c.bxC1='#b9f0a0';t15c.bxA=1;t15c.bxPt=.45;t15c.bxPb=.45;t15c.bxPl=.9;t15c.bxPr=.9;t15c.bxRad=1.6;Ls.push(t15c);
-      Ls.push(T({role:'main',name:'메인 제목',x:.5,y:.75,text:mainT,fs:.042,color:'#ffffff',shadow:true,align:'left',chip:'none',lineH:1.5}));}
+      Ls.push(T({role:'main',name:'메인 제목',x:.5,y:.78,text:mainT,fs:.048,color:'#ffffff',shadow:true,align:'left',chip:'none',lineH:1.45}));}
     else {PBG2();
-      Ls.push(IMG({role:'deco',name:'흰 카드',x:.44,y:.75,w:.84,h:.42,color:'#ffffff'}));
-      Ls.push(IMG({role:'deco2',name:'상단 두꺼운 라인',x:.3,y:.585,w:.3,h:.008,color:'#111111'}));
-      Ls.push(T({role:'main',name:'제목',x:.42,y:.71,text:mainT,fs:.036,color:'#111111',align:'left',chip:'none',lineH:1.5}));
-      Ls.push(T({role:'sub',name:'설명',x:.4,y:.85,text:'썸네일 설명을 입력하세요',fs:.02,color:'#999999',align:'left',chip:'none',weight:500}));}
+      Ls.push(IMG({role:'deco',name:'흰 카드',x:.54,y:.79,w:.92,h:.42,color:'#ffffff'}));
+      Ls.push(IMG({role:'deco2',name:'상단 두꺼운 라인',x:.44,y:.605,w:.56,h:.007,color:'#111111'}));
+      Ls.push(T({role:'main',name:'제목',x:.5,y:.75,text:mainT,fs:.04,color:'#111111',align:'left',chip:'none',lineH:1.5}));
+      Ls.push(T({role:'sub',name:'설명',x:.42,y:.89,text:'썸네일 설명을 입력하세요',fs:.021,color:'#999999',align:'left',chip:'none',weight:500}));}
     return Ls;
   }
   if(tid&&tid.indexOf('bR')===0){
