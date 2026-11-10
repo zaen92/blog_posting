@@ -528,7 +528,7 @@ input[type=radio]{display:none}
       <div class="rb" id="rb3"><div class="rh"><span class="rh-t">📝 블로그 본문</span><span class="rh-m" id="cc"></span></div><div class="rbd"><div class="bt" id="btxt"></div><button class="cp" onclick="cpId('btxt',this)">📋 본문 전체 복사</button></div></div>
       <div class="rb" id="rb4"><div class="rh"><span class="rh-t">🏷️ 해시태그</span></div><div class="rbd"><div class="tw" id="tw"></div><button class="cp" onclick="cpTags(this)">📋 해시태그 전체 복사</button></div></div>
       <div class="rb" id="rb5"><div class="rh"><span class="rh-t">🎬 릴스 자막 & 썸네일 문구 5가지</span></div><div class="rbd">
-        <div class="sl">릴스 / 숏폼 자막</div><div class="et" id="rt"></div><button class="cp" onclick="cpId('rt',this)">📋 자막 복사</button>
+        <div class="sl">릴스 / 숏폼 자막</div><div class="et" id="rt"></div><button class="cp" onclick="cpId('rt',this)">📋 자막 복사</button><button class="cp" id="rtRegen" onclick="regenReel()" title="본문은 그대로 두고 릴스 대본만 새로운 훅으로 다시 씁니다">🔄 대본 다시 쓰기</button>
         <div class="dv"></div>
         <div class="sl">썸네일 문구 5가지 <span style="font-weight:400;color:#aaa;font-size:11px">— 클릭하면 아래 썸네일 메이커에 적용</span></div><div class="thumb-grid" id="thumbGrid"></div>
         <button class="cp" onclick="cpThumbs(this)" style="margin-top:12px">📋 썸네일 전체 복사</button>
@@ -1248,7 +1248,7 @@ function buildPrompt(t,m,c,info){
     +'"place_name":"업체명","place_address":"정확한 주소","place_hours":"영업시간","place_price":"가격대",'
     +'"body":"본문 (반드시 '+(vm[sV]||'1500~1800자')+' 공백 포함)",'
     +'"hashtags":["#태그1","#태그2"],'
-    +'"reel":"릴스/숏츠 내레이션 대본 전체. 본문과 똑같은 말투(위 말투 규칙과 내 글 샘플)로 쓰세요. 구성: ①후킹 1~2줄 (스크롤을 멈추게 하는 질문이나 반전) ②본문 6~10줄 (직접 겪은 포인트와 꿀팁을 리듬감 있게) ③마무리 1줄. 각 줄은 짧게 끊고 \\n으로 구분, 전체 300~500자. 금지: 꿀팁 대방출, 저장 필수, 클릭각, 레전드, 인정?, 미쳤다, ~각이다 같은 유행어 광고체와 과장된 감탄. 본문에 없는 사실을 새로 만들지 마세요.",'
+    +'"reel":"릴스/숏츠 내레이션 대본 전체. 본문과 똑같은 말투(위 말투 규칙과 내 글 샘플)로 쓰세요. 구조: ①훅 1~2줄 — 반드시 다음 중 하나로 시작: 결과·결론을 먼저 던지기 / 구체적인 숫자 / 의외의 사실·반전 / 보는 사람이 뜨끔할 공감 질문. 느슨한 도입(오늘은 ~ 소개할게요, ~ 다녀왔어요, 안녕하세요) 절대 금지 — 첫 줄만 보고 멈추게 만들 것 ②본문 6~10줄 — 한 줄 7~18자로 짧게 끊고, 줄마다 정보나 포인트 하나씩만, 군더더기 접속사 빼고 리듬감 있게 ③마무리 1줄 — 다음 행동이나 여운. 각 줄은 짧게 끊고 \\n으로 구분, 전체 250~450자. 금지: 꿀팁 대방출, 저장 필수, 클릭각, 레전드, 인정?, 미쳤다, ~각이다 같은 유행어 광고체와 과장된 감탄. 본문에 없는 사실을 새로 만들지 마세요.",'
     +'"thumbnail_1":"메인 문구 (검색 키워드+장소 특징, 15자 이내)","thumbnail_2":"","thumbnail_3":"","thumbnail_4":"","thumbnail_5":""}';
 }
 
@@ -1309,6 +1309,43 @@ async function gen(){
 }
 
 function nl(s){return (s||'').replace(/\\n/g,'\n');}
+async function regenReel(){
+  if(!resultData||!(resultData.body||resultData.body0)){toast('먼저 글을 생성해주세요. 글이 있어야 대본을 다시 쓸 수 있어요.');return;}
+  var btn=g('rtRegen');
+  if(btn&&btn.disabled)return;
+  if(btn){btn.disabled=true;btn.textContent='⏳ 다시 쓰는 중...';}
+  var el=g('rt');
+  var sty='';
+  if(STYLE_SAMPLES.length){
+    sty='[내가 실제로 쓴 글 — 말투의 기준]\n';
+    STYLE_SAMPLES.forEach(function(sm,i){sty+='--- 샘플 '+(i+1)+' ---\n'+String(sm).slice(0,1200)+'\n';});
+    sty+='\n';
+  }
+  var prev=resultData.reel?('[직전 대본 — 훅과 도입, 문장 구성을 반복하지 말고 완전히 다른 각도로 쓸 것]\n'+nl(resultData.reel).slice(0,600)+'\n\n'):'';
+  var p=sty+prev
+    +'[작업] 아래 블로그 본문을 릴스/숏폼 내레이션 대본으로 다시 써줘. 대본 텍스트만 출력하고 설명이나 JSON, 따옴표는 붙이지 마.\n'
+    +'[말투] 위 샘플과 본문의 말투 그대로. 유행어 광고체(꿀팁 대방출/저장 필수/클릭각/레전드/인정?/미쳤다/~각) 금지.\n'
+    +'[구조]\n'
+    +'1) 훅 1~2줄: 결과를 먼저 던지거나, 구체적 숫자, 의외의 사실, 뜨끔한 공감 질문 중 하나. "오늘은 ~ 소개" 같은 느슨한 도입 금지. 첫 줄만 보고 멈추게.\n'
+    +'2) 본문 6~10줄: 한 줄 7~18자, 줄마다 정보 하나, 군더더기 없이 리듬감 있게.\n'
+    +'3) 마무리 1줄: 다음 행동이나 여운.\n'
+    +'[길이] 전체 250~450자, 줄바꿈으로 줄 구분.\n'
+    +'[주의] 본문에 없는 사실을 만들지 마.\n\n'
+    +'[블로그 본문]\n'+String(resultData.body||resultData.body0).slice(0,3500);
+  try{
+    var out=await aiCall(p,null,function(full){if(el)el.textContent=full;});
+    var txt=(out.text||'').trim();
+    if(txt){
+      resultData.reel=txt.replace(/\n/g,'\\n');
+      if(el)el.textContent=txt;
+      toast('릴스 대본을 새로 썼어요. 마음에 안 들면 또 눌러도 돼요.');
+    } else toast('응답이 비어 있어요. 다시 시도해주세요.');
+  }catch(e){
+    toast((e&&e.message)||'대본 생성 실패');
+    if(el&&resultData.reel)el.textContent=nl(resultData.reel);
+  }
+  if(btn){btn.disabled=false;btn.textContent='🔄 대본 다시 쓰기';}
+}
 function recover(raw,ft){
   function pk(k){var re=new RegExp('"'+k+'"\\s*:\\s*"((?:[^"\\\\]|\\\\.)*)"');var m=raw.match(re);return m?m[1]:'';}
   function pa(k){var re=new RegExp('"'+k+'"\\s*:\\s*\\[([\\s\\S]*?)\\]');var m=raw.match(re);if(!m)return[];var it=m[1].match(/"((?:[^"\\]|\\.)*)"/g);return it?it.map(function(s){return s.replace(/^"|"$/g,'');}):[];}
